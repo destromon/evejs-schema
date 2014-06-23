@@ -3,12 +3,13 @@ var eden = require('./build/server/node_modules/edenjs/lib/index');
 
 var paths = require('./config');
 var data  = {};
+var fs = require('fs');
 
 eden('sequence')
 
 //Create schema folder
 .then(function(next) {
-    console.log('Creating Schema Folder!!');
+    console.log('Creating Schema Folder..');
     eden('folder', paths.dev + '/' + paths.schema)
     .mkdir(0777, function() {
         next();
@@ -17,12 +18,10 @@ eden('sequence')
 
 //Loop through schema folder
 .then(function(next) {
-    console.log('Getting all Files');
+    console.log('Getting All Schema...');
     
     // var schema = require('./schema/post.js');
     // console.log(schema);
-
-    var fs=require('fs');
 
     var dir='./schema/';
     
@@ -38,7 +37,6 @@ eden('sequence')
                 if (0===--c) {
                     console.log('going next');
                     next();
-                    //console.log(data);  //socket.emit('init', {data: data});
                 }
                 
             });
@@ -46,37 +44,44 @@ eden('sequence')
     });
 })
 
-//create folder inside build
+//loop through schema and get properties
 .then(function(next) {
     var template  = {};
-    var _readKeys = function(parent, content) {
+    var _readKeys = function(content, schema) {
         for(var key in content) {
-            if(typeof content[key] === 'object'){        
-               //console.log('object-> ', key, content[key])
-               //console.log('field', key);
-               console.log(key);
-                _readKeys(key, content[key]);
+            //check and recurse if its an object
+            if(typeof content[key] === 'object'){
+               template += "{{{block 'field/text' '"+key+"' ../"+schema+"."+key+"}}}";
+            //   console.log('field', key);
+                _readKeys(content[key], schema);
             } 
 
             if(typeof content[key] === 'function') {
-                console.log('type ', content[key].toString().substring(9,content[key].toString().indexOf('(')));  
+            //    console.log(key,  ' = ', content[key].toString().substring(9,content[key].toString().indexOf('(')));  
             }
 
             if(typeof content[key] === 'string') {
-                console.log('string field = ', key);
+            //    console.log(key,  ' = ',  content[key]);
             }
 
             if(typeof content[key] === 'boolean') {
-                console.log('bool field = ', key);
+            //    console.log(key,  ' = ', content[key]);
             }
         }
-        console.log(template);
     }
-    //console.log('displaying schemas!', data);
     for(var schema in data)  {
         var content = require('./schema/' + schema);
-        //console.log('schema for ->', schema, content);
+        template = {};
         console.log('reading schema!');
-        _readKeys(parent, content);
+        var file = schema.toString().substring(0,schema.toString().length-3);
+        _readKeys(content, file);
+        //console.log(template);
+        fs.writeFile(paths.dev + '/' + paths.schema + '/'+schema, template, function(err) {
+            if (err) {
+                console.log('failed to create template');
+            } else {
+                console.log('template successfully created');
+            }
+        });
     }
 })
