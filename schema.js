@@ -48,12 +48,14 @@ eden('sequence')
 
 //create folder inside build
 .then(function(next) {
-    var _readKeys = function(content) {
+    var template  = {};
+    var _readKeys = function(parent, content) {
         for(var key in content) {
             if(typeof content[key] === 'object'){        
                //console.log('object-> ', key, content[key])
-               console.log('field', key);
-                _readKeys(content[key]);
+               //console.log('field', key);
+               console.log(key);
+                _readKeys(key, content[key]);
             } 
 
             if(typeof content[key] === 'function') {
@@ -68,12 +70,13 @@ eden('sequence')
                 console.log('bool field = ', key);
             }
         }
+        console.log(template);
     }
     //console.log('displaying schemas!', data);
     for(var schema in data)  {
         var content = require('./schema/' + schema);
         //console.log('schema for ->', schema, content);
         console.log('reading schema!');
-        _readKeys(content);
+        _readKeys(parent, content);
     }
 })
