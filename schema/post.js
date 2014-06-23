@@ -13,7 +13,8 @@ module.exports = {
     status      : { type: String, enum: ['draft', 'review', 'published'] },
     visibility  : { type: String, enum: ['public', 'private'] },
     active      : { type: Boolean, default: true },
-    published   : { type: Date, default: Date.now },
+    published   : { type: String, default: Date.now },
     created     : { type: Date, default: Date.now },
-    updated     : { type: Date, default: Date.now }
+    updated     : { type: Date, default: Date.now },
+
 };
