@@ -1,9 +1,10 @@
-//requrie denpendancies
+var schemaFiles = process.argv.slice(2);
+//require denpendancies
 var eden = require('./build/server/node_modules/edenjs/lib/index');
 
 var paths = require('./config');
 var data  = {};
-var fs = require('fs');
+var fs    = require('fs');
 
 eden('sequence')
 
@@ -18,23 +19,48 @@ eden('sequence')
 
 //Loop through schema folder
 .then(function(next) {
-    console.log('Getting All Schema...');
+    console.log('Getting All Schema...', schemaFiles);
     var dir='./schema/';
-
-    fs.readdir(dir, function(err,files){
-        if (err) throw err;
-        var c=0;
-        files.forEach(function(file){
+    
+    //need to fix this
+    if(schemaFiles.length >= 1) {
+        var c = 0;
+        for(var index = 0; index <= schemaFiles.length-1;index++) {
+            //console.log(index, schemaFiles[index]);
             c++;
-            fs.readFile(dir+file,'utf-8',function(err, schema){
-                if (err) throw err;
-                data[file]=schema;
+            file = schemaFiles[c];
+            fs.readFile(dir+file,'utf-8',function(err, schema) {
+                console.log(file);
+                if (err) {
+                    console.log('invalid file');
+                }
+                data[file]+=schema;
                 if (0===--c) {
                     next();
                 }            
-            });
-        });        
-    });
+           });
+        }
+    //end
+    } else {
+        fs.readdir(dir, function(err,files) {
+            if (err) throw err;
+            var c=0;
+            files.forEach(function(file){
+                c++;
+                console.log(file);
+                fs.readFile(dir+file,'utf-8',function(err, schema) {
+                    if (err) {
+                        console.log('invalid file');
+                    }
+
+                    data[file]=schema;
+                    if (0===--c) {
+                        next();
+                    }            
+                });
+            });        
+        });    
+    }
 })
 
 //loop through schema and get properties
@@ -142,8 +168,8 @@ eden('sequence')
         }
     };
 
-    var createTemplate = function(file, schema, template) {
-        fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + '/' +schema, template, function(err) {
+    var createTemplate = function(file, template) {
+        fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + '/' +'form.html', template, function(err) {
             if (err) {
                 console.log('failed to create template');
             } else {
@@ -162,14 +188,12 @@ eden('sequence')
         //get file name        
         var file = schema.toString().substring(0,schema.toString().length-3);
         eden('folder', paths.dev + '/' + paths.schema + '/' + file)
-        .mkdir(0777, function(err) {
-
-        });
+        .mkdir(0777, function(err) {});
         //traverse through property
         _readKeys(content, file);
         
         //create template'
         schema = schema.replace('.js', '.html');
-        createTemplate(file, schema, template);
+        createTemplate(file, template);
     }
 })
