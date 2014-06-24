@@ -1,0 +1,133 @@
+{{#block 'form/fieldset' 'Name <span>*</span>' errors.name.message}}
+	{{{block 'field/text' 'name' ../user.name}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Slug <span>*</span>' errors.slug.message}}
+	{{{block 'field/text' 'slug' ../user.slug}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Email <span>*</span>' errors.email.message}}
+	{{{block 'field/text' 'email' ../user.email}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Password' errors.password.message}}
+	{{{block 'field/password' 'password' ../user.password}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Birthdate' errors.birthdate.message}}
+	{{{block 'field/datetime' 'birthdate' ../user.birthdate}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Gender' errors.gender.message}}
+	{{{block 'field/select' 'gender' 'male|female|null' user.gender}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Website' errors.website.message}}
+	{{{block 'field/text' 'website' ../user.website}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Phone' errors.phone.message}}
+	{{{block 'field/text' 'phone' ../user.phone}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Label' errors.label.message}}
+	{{{block 'field/text' 'label' ../address.label}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Contact' errors.contact.message}}
+	{{{block 'field/text' 'contact' ../address.contact}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Street' errors.street.message}}
+	{{{block 'field/text' 'street' ../address.street}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Neighborhood' errors.neighborhood.message}}
+	{{{block 'field/text' 'neighborhood' ../address.neighborhood}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'City' errors.city.message}}
+	{{{block 'field/text' 'city' ../address.city}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'State' errors.state.message}}
+	{{{block 'field/text' 'state' ../address.state}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Region' errors.region.message}}
+	{{{block 'field/text' 'region' ../address.region}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Country' errors.country.message}}
+	{{{block 'field/text' 'country' ../address.country}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Postal' errors.postal.message}}
+	{{{block 'field/text' 'postal' ../address.postal}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Phone' errors.phone.message}}
+	{{{block 'field/text' 'phone' ../address.phone}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Name' errors.name.message}}
+	{{{block 'field/text' 'name' ../company.name}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Title' errors.title.message}}
+	{{{block 'field/text' 'title' ../company.title}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Street' errors.street.message}}
+	{{{block 'field/text' 'street' ../company.street}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'City' errors.city.message}}
+	{{{block 'field/text' 'city' ../company.city}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'State' errors.state.message}}
+	{{{block 'field/text' 'state' ../company.state}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Country' errors.country.message}}
+	{{{block 'field/text' 'country' ../company.country}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Postal' errors.postal.message}}
+	{{{block 'field/text' 'postal' ../company.postal}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Phone' errors.phone.message}}
+	{{{block 'field/text' 'phone' ../company.phone}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Email' errors.email.message}}
+	{{{block 'field/text' 'email' ../company.email}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Date' errors.date.message}}
+	{{{block 'field/datetime' 'date' ../photo.date}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Facebook' errors.facebook.message}}
+	{{{block 'field/text' 'facebook' ../user.facebook}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Twitter' errors.twitter.message}}
+	{{{block 'field/text' 'twitter' ../user.twitter}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Google' errors.google.message}}
+	{{{block 'field/text' 'google' ../user.google}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Linkedin' errors.linkedin.message}}
+	{{{block 'field/text' 'linkedin' ../user.linkedin}}}
+{{/block}}
+
+{{#block 'form/fieldset' 'Active' errors.active.message}}
+	{{#block 'field/radio' 'active' ../user.active}}{{/block}}
+	{{#block 'field/radio' 'active' ../user.active}}{{/block}}
+{{/block}}
+

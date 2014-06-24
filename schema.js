@@ -93,6 +93,7 @@ eden('sequence')
             } else {
                 //get field according to type property
                 if(content[key].hasOwnProperty('type')) {
+                    field = content[key].type.toString().toLowerCase();
                 } else {
                     //otherwise, its a collection
                     if(key != 0) {
@@ -145,24 +146,24 @@ eden('sequence')
             switch(type) {
                 //for radio
                 case 'radio':
-                    template += '{{#block ' +'\'form/fieldset\' '+  title + required + ' errors.'+field+'.message}}' +
-                    '\n\t{{{block '+ '\'field/'+type +'\' ' +field+' ../'+ schema+'.'+field +'}}}';
-                     template += '\n\t{{{block '+ '\'field/'+type +'\' ' +field+' ../'+ schema+'.'+field +'}}}' + '\n{{/block}}\n\n';
+                    template += '{{#block ' +'\'form/fieldset\' \''+title + required + '\' errors.'+field+'.message}}' +
+                    '\n\t{{#block '+ '\'field/'+type +'\' \'' +field+'\' ../'+ schema+'.'+field +'}}{{/block}}';
+                     template += '\n\t{{#block '+ '\'field/'+type +'\' \'' +field+'\' ../'+ schema+'.'+field +'}}{{/block}}' + '\n{{/block}}\n\n';
                     break;
 
                 //for select
                 case 'select':
                     data = data.toString().substring(0, data.toString().length-1);
-                    template += '{{#block ' +'\'form/fieldset\' '+  title + required + ' errors.'+field+'.message}}' +
-                    '\n\t{{{block '+ '\'field/'+type +'\' ' +field+ ' \''+ data +'\' '+ schema+'.'+field +'}}}' + '\n{{/block}}\n\n';
+                    template += '{{#block ' +'\'form/fieldset\' \''+title + required + '\' errors.'+field+'.message}}' +
+                    '\n\t{{{block '+ '\'field/'+type +'\' \'' +field+ '\' \''+ data +'\' '+ schema+'.'+field +'}}}' + '\n{{/block}}\n\n';
                     break;
 
                 //default template
                 default:
                     //check if it has type before assigning the template
                     if(content[key].hasOwnProperty('type')) {
-                        template += '{{#block ' +'\'form/fieldset\' '+  title + required + ' errors.'+field+'.message}}' +
-                        '\n\t{{{block '+ '\'field/'+type +'\' ' +field+' ../'+ schema+'.'+field +'}}}' + '\n{{/block}}\n\n';
+                        template += '{{#block ' +'\'form/fieldset\' \''+title + required + '\' errors.'+field+'.message}}' +
+                        '\n\t{{{block '+ '\'field/'+type +'\' \'' +field+'\' ../'+ schema+'.'+field +'}}}' + '\n{{/block}}\n\n';
                         break;
                     }
             }

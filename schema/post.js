@@ -13,7 +13,7 @@ revision: [{
     }
 }],
     
-    status      : { type: String, enum: ['draft', 'review', 'published'] },
+    status      : { type: String, enum: ['draft', 'review', 'published', 'other'] },
     visibility  : { type: String, enum: ['public', 'private'] },
     active      : { type: Boolean, default: true },
     published   : { type: String, default: Date.now },
