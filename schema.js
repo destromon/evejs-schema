@@ -1,4 +1,6 @@
+//get schema if theres any
 var schemaFiles = process.argv.slice(2);
+
 //require denpendancies
 var eden = require('./build/server/node_modules/edenjs/lib/index');
 
@@ -22,25 +24,24 @@ eden('sequence')
     console.log('Getting All Schema...', schemaFiles);
     var dir='./schema/';
     
-    //need to fix this
+    //if user specify a schema
     if(schemaFiles.length >= 1) {
         var c = 0;
-        for(var index = 0; index <= schemaFiles.length-1;index++) {
-            //console.log(index, schemaFiles[index]);
+        schemaFiles.forEach(function(file) {
             c++;
-            file = schemaFiles[c];
             fs.readFile(dir+file,'utf-8',function(err, schema) {
-                console.log(file);
                 if (err) {
                     console.log('invalid file');
                 }
-                data[file]+=schema;
+
+                data[file]=schema;
                 if (0===--c) {
                     next();
                 }            
-           });
-        }
-    //end
+            });
+        });
+    
+    //read all schema
     } else {
         fs.readdir(dir, function(err,files) {
             if (err) throw err;
