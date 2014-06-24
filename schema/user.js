@@ -4,7 +4,7 @@ module.exports = {
     email       : { type: String, required: true },
     password    : { type: String },
     birthdate   : { type: Date },
-    gender      : { type: String, enum: ['male', 'female', null, ''] },
+    gender      : { type: String, enum: ['male', 'female', null] },
     website     : { type: String },
     phone       : { type: String },
     address     : [{

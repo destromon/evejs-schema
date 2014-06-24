@@ -39,14 +39,14 @@ eden('sequence')
 
 //loop through schema and get properties
 .then(function(next) {
-    var template = {};
+    var template = [];
 
     var _readKeys = function(content, schema) {
         for(var key in content) {
             var field    = '';
             var type     = '';
             var required = '';
-
+            var data     = '';
             //check if there's field property
             if(content[key].field !== undefined) {
                 type = content[key].field;
@@ -57,7 +57,9 @@ eden('sequence')
             } else if(content[key].hasOwnProperty('enum')) {
                 field = key;
                 type  = 'select';
-                //console.log(key, 'type ->', ' select')
+                for(var select in content[key].enum) {
+                   data += content[key].enum[select] +'|';
+                }
             } else {
 
                 //get field according to type
@@ -104,14 +106,30 @@ eden('sequence')
 
             var title = field.charAt(0).toUpperCase() + field.substring(1,field.length);
 
-             template += '{{#block ' +'\'form/fieldset\' '+  title + required + ' errors.'+field+'.message}}' +
-                    '{{{block '+ '\'field/'+type +'\' ' +field+' ../'+ schema+'.'+field +'}}}' + '{{/block}}';
+            switch(type) {
+                case 'radio':
+                    template += '{{#block ' +'\'form/fieldset\' '+  title + required + ' errors.'+field+'.message}}' +
+                    '\n\t{{{block '+ '\'field/'+type +'\' ' +field+' ../'+ schema+'.'+field +'}}}';
+                     template += '\n\t{{{block '+ '\'field/'+type +'\' ' +field+' ../'+ schema+'.'+field +'}}}' + '\n{{/block}}\n\n';
+                    break;
+
+                case 'select':
+                    data = data.toString().substring(0, data.toString().length-1);
+                    template += '{{#block ' +'\'form/fieldset\' '+  title + required + ' errors.'+field+'.message}}' +
+                    '\n\t{{{block '+ '\'field/'+type +'\' ' +field+ ' \''+ data +'\' '+ schema+'.'+field +'}}}' + '\n{{/block}}\n\n';
+                    break;
+
+                default:
+                    template += '{{#block ' +'\'form/fieldset\' '+  title + required + ' errors.'+field+'.message}}' +
+                    '\n\t{{{block '+ '\'field/'+type +'\' ' +field+' ../'+ schema+'.'+field +'}}}' + '\n{{/block}}\n\n';
+                    break;
+            }
         }
     }
 
     for(var schema in data)  {
         //require schema
-        template = {};
+        template = [];
         var content = require('./schema/' + schema);
 
         //get file name        
@@ -123,8 +141,9 @@ eden('sequence')
         //create template
         console.log('Creating template for ', file);
         
-        //remove object on template
         console.log(template);
+        //remove object on template
+   
         fs.writeFile(paths.dev + '/' + paths.schema + '/'+schema, template, function(err) {
             if (err) {
                 console.log('failed to create template');
