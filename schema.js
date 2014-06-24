@@ -47,6 +47,7 @@ eden('sequence')
             var type     = '';
             var required = '';
             var data     = '';
+
             //check if there's field property
             if(content[key].field !== undefined) {
                 type = content[key].field;
@@ -61,40 +62,43 @@ eden('sequence')
                    data += content[key].enum[select] +'|';
                 }
             } else {
-
-                //get field according to type
+                //get field according to type property
                 if(content[key].hasOwnProperty('type')) {
 
                     var field = content[key].type.toString().toLowerCase();
                     //console.log(field);
-                    //case if string
+
+                    //if its string then its text
                     if (field.indexOf('string') !== -1 ) {
                         type = 'text';
                         //console.log(key, ' field is ', type);
 
-                    //case if boolean
+                    //if its boolean then its radio
                     } else if(field.indexOf('boolean') !== -1) {
                         type = 'radio';
                         //console.log(key, ' field is ', type);
 
-                    //case if date
+                    //if its date then its datetime
                     } else if(field.indexOf('date') !== -1) {
                         type = 'datetime';
                         //console.log(key, ' field is ', type);
-                    } 
+                    }
+
+                    //get the name of the field
                     field = key;
                 } else {
+                    //otherwise, its a collection
                     //console.log (key, 'is array so its ewan pa');
                 }
-
-                
             }
             
+            //now we got all the data, lets add it to template
+            //ignore if property is created or updated
             if(key === 'created' || key === 'updated') {
                 break;
             }
 
-            //check if its required!
+            //check if it has required property!
             if(content[key].hasOwnProperty('required')) {
                 required = ' <span>*</span>';
             } else if(content[key].hasOwnProperty('data')) {
@@ -104,21 +108,26 @@ eden('sequence')
                 //_readKeys(content[key], schema);
             }
 
+            //uppercase first letter of title
             var title = field.charAt(0).toUpperCase() + field.substring(1,field.length);
 
+            //check field type and assign it to template
             switch(type) {
+                //for radio
                 case 'radio':
                     template += '{{#block ' +'\'form/fieldset\' '+  title + required + ' errors.'+field+'.message}}' +
                     '\n\t{{{block '+ '\'field/'+type +'\' ' +field+' ../'+ schema+'.'+field +'}}}';
                      template += '\n\t{{{block '+ '\'field/'+type +'\' ' +field+' ../'+ schema+'.'+field +'}}}' + '\n{{/block}}\n\n';
                     break;
 
+                //for select
                 case 'select':
                     data = data.toString().substring(0, data.toString().length-1);
                     template += '{{#block ' +'\'form/fieldset\' '+  title + required + ' errors.'+field+'.message}}' +
                     '\n\t{{{block '+ '\'field/'+type +'\' ' +field+ ' \''+ data +'\' '+ schema+'.'+field +'}}}' + '\n{{/block}}\n\n';
                     break;
 
+                //default template
                 default:
                     template += '{{#block ' +'\'form/fieldset\' '+  title + required + ' errors.'+field+'.message}}' +
                     '\n\t{{{block '+ '\'field/'+type +'\' ' +field+' ../'+ schema+'.'+field +'}}}' + '\n{{/block}}\n\n';
@@ -127,27 +136,26 @@ eden('sequence')
         }
     }
 
+    //loop through schema folder
     for(var schema in data)  {
         //require schema
-        template = [];
         var content = require('./schema/' + schema);
+
+        //reset template
+        template = [];
 
         //get file name        
         var file = schema.toString().substring(0,schema.toString().length-3);
 
-        //read property
+        //traverse through property
         _readKeys(content, file);
         
         //create template
-        console.log('Creating template for ', file);
-        
-        console.log(template);
-        //remove object on template
-   
         fs.writeFile(paths.dev + '/' + paths.schema + '/'+schema, template, function(err) {
             if (err) {
                 console.log('failed to create template');
             } else {
+                console.log('Creating template for ', file);
                 console.log(file, 'template has been created.');
             }
         });
