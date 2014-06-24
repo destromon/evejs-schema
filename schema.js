@@ -40,42 +40,65 @@ eden('sequence')
 //loop through schema and get properties
 .then(function(next) {
     var template = {};
-    var counter = 0;
+    var counter  = 0;
+
     var _readKeys = function(content, schema, parent) {
         for(var key in content) {
-            //check and recurse if its an object
-            if(typeof content[key] === 'object'){
-                console.log('---------------');
-                //template[counter] = key;
-                template[parent] = key
-                counter++;
-                console.log('parent = ', parent, 'key = ',key);
-                _readKeys(content[key], schema, key);
-            } 
-            if(typeof content[key] === 'function') {
-                var v  = content[key].toString().substring(9,content[key].toString().indexOf('(')).toLowerCase();
-                var k  = [];
-                k[key] = v;
-                template[parent] = k;
-                console.log(parent, '->', key,  ' = ', content[key].toString().substring(9,content[key].toString().indexOf('(')).toLowerCase());  
-            }
+            var field    = '';
+            var type     = '';
+            var required = '';
 
-            if(typeof content[key] === 'string') {
-                console.log('we are in string', key.length);
-                var k  = [];
-                k[key] = content[key].toString();
-                template[parent] = k;
-                console.log('for string!');
-                console.log(parent, '->', key,  ' = ',  content[key]);
-            }
+            //check if there's field property
+            if(content[key].field !== undefined) {
+                type = content[key].field;
+                field = key;
+                console.log(key, 'type ->', type);
 
-            if(typeof content[key] === 'boolean') {
-                template[parent][key] = content[key];
-                console.log(parent, '->', key,  ' = ', content[key]);
+            //check if its select
+            } else if(content[key].hasOwnProperty('enum')) {
+                field = key;
+                type  = 'select';
+                console.log(key, 'type ->', ' select')
+            } else {
+
+                //get its type
+                if(content[key].hasOwnProperty('type')) {
+
+                    var field = content[key].type.toString().toLowerCase();
+                    console.log(field);
+                    //case if string
+                    if (field.indexOf('string') !== -1 ) {
+                        type = 'text';
+                        console.log(key, ' field is ', type);
+
+                    //case if boolean
+                    } else if(field.indexOf('boolean') !== -1) {
+                        type = 'radio';
+                        console.log(key, ' field is ', type);
+
+                    //case if date
+                    } else if(field.indexOf('date') !== -1) {
+                        type = 'datetime';
+                        console.log(key, ' field is ', type);
+                    } 
+                    field = key;
+                } else {
+                    console.log (key, 'is array so its ewan pa');
+                }
+
+                //check if its required!
+                if(content[key].hasOwnProperty('required')) {
+                    required = '<span>*</span>';
+                }
             }
-            
+                if(key === 'created' || key === 'updated') {
+                    break;
+                }
+                //add to template
+                template += '{{{block '+ '\'field/'+type +'\' ' +field+' ../'+ schema+'.'+field +'}}}';
         }
     }
+
     for(var schema in data)  {
         var content = require('./schema/' + schema);
         console.log('reading schema!');
@@ -83,14 +106,14 @@ eden('sequence')
         _readKeys(content, file, file);
         console.log('printing template!!')
         console.log(template);
+        
+        fs.writeFile(paths.dev + '/' + paths.schema + '/'+schema, template, function(err) {
+            if (err) {
+                console.log('failed to create template');
+            } else {
+                console.log('template successfully created');
+            }
+        });
         return;
-        console.log('next....');
-        // fs.writeFile(paths.dev + '/' + paths.schema + '/'+schema, template, function(err) {
-        //     if (err) {
-        //         console.log('failed to create template');
-        //     } else {
-        //         console.log('template successfully created');
-        //     }
-        // });
     }
 })

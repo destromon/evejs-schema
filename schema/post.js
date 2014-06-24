@@ -6,9 +6,12 @@ module.exports = {
         field: 'textarea'
     },
     revision: [{
+        data: {
         title   : String,
         detail  : String, 
-        created : String }],
+        created : String },
+        field :'textarea' 
+    }],
     
     status      : { type: String, enum: ['draft', 'review', 'published'] },
     visibility  : { type: String, enum: ['public', 'private'] },
