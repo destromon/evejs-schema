@@ -3,15 +3,15 @@ module.exports = {
     title   : { type: String, required: true },
     detail  : {
         data : { type: String, required: true },
-        field: 'textarea'
+        field: 'wysiwyg'
     },
-    revision: [{
-        data: {
-        title   : String,
-        detail  : String, 
-        created : String },
-        field :'textarea' 
-    }],
+revision: [{
+    data: {
+        title   : { type: String },
+        detail  : { type: String },
+        created : { type: String }
+    }
+}],
     
     status      : { type: String, enum: ['draft', 'review', 'published'] },
     visibility  : { type: String, enum: ['public', 'private'] },

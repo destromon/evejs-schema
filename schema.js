@@ -61,35 +61,37 @@ eden('sequence')
                 for(var select in content[key].enum) {
                    data += content[key].enum[select] +'|';
                 }
+            } else if(content[key].hasOwnProperty('data')) {
+                _readKeys(content[key].data, schema);
             } else {
                 //get field according to type property
                 if(content[key].hasOwnProperty('type')) {
-
-                    var field = content[key].type.toString().toLowerCase();
-                    //console.log(field);
-
-                    //if its string then its text
-                    if (field.indexOf('string') !== -1 ) {
-                        type = 'text';
-                        //console.log(key, ' field is ', type);
-
-                    //if its boolean then its radio
-                    } else if(field.indexOf('boolean') !== -1) {
-                        type = 'radio';
-                        //console.log(key, ' field is ', type);
-
-                    //if its date then its datetime
-                    } else if(field.indexOf('date') !== -1) {
-                        type = 'datetime';
-                        //console.log(key, ' field is ', type);
-                    }
-
-                    //get the name of the field
-                    field = key;
                 } else {
                     //otherwise, its a collection
-                    //console.log (key, 'is array so its ewan pa');
+                    if(key != 0) {
+                        _readKeys(content[key], key);    
+                    }
+                    //console.log(content[key]);
                 }
+                
+                //if its string then its text
+                if (field.indexOf('string') !== -1 ) {
+                    type = 'text';
+                    //console.log(key, ' field is ', type);
+
+                //if its boolean then its radio
+                } else if(field.indexOf('boolean') !== -1) {
+                    type = 'radio';
+                    //console.log(key, ' field is ', type);
+
+                //if its date then its datetime
+                } else if(field.indexOf('date') !== -1) {
+                    type = 'datetime';
+                    //console.log(key, ' field is ', type);
+                }
+
+                //get the name of the field
+                field = key;
             }
             
             //now we got all the data, lets add it to template
@@ -107,6 +109,7 @@ eden('sequence')
                 }
                 //_readKeys(content[key], schema);
             }
+
 
             //uppercase first letter of title
             var title = field.charAt(0).toUpperCase() + field.substring(1,field.length);
@@ -129,13 +132,25 @@ eden('sequence')
 
                 //default template
                 default:
-                    template += '{{#block ' +'\'form/fieldset\' '+  title + required + ' errors.'+field+'.message}}' +
-                    '\n\t{{{block '+ '\'field/'+type +'\' ' +field+' ../'+ schema+'.'+field +'}}}' + '\n{{/block}}\n\n';
-                    break;
+                    //check if it has type before assigning the template
+                    if(content[key].hasOwnProperty('type')) {
+                        template += '{{#block ' +'\'form/fieldset\' '+  title + required + ' errors.'+field+'.message}}' +
+                        '\n\t{{{block '+ '\'field/'+type +'\' ' +field+' ../'+ schema+'.'+field +'}}}' + '\n{{/block}}\n\n';
+                        break;
+                    }
             }
         }
-    }
+    };
 
+    var createTemplate = function(file, schema, template) {
+        fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + '/' +schema, template, function(err) {
+            if (err) {
+                console.log('failed to create template');
+            } else {
+                console.log(file, 'template has been created.');
+            }
+        });
+    }
     //loop through schema folder
     for(var schema in data)  {
         //require schema
@@ -146,18 +161,15 @@ eden('sequence')
 
         //get file name        
         var file = schema.toString().substring(0,schema.toString().length-3);
+        eden('folder', paths.dev + '/' + paths.schema + '/' + file)
+        .mkdir(0777, function(err) {
 
+        });
         //traverse through property
         _readKeys(content, file);
         
-        //create template
-        fs.writeFile(paths.dev + '/' + paths.schema + '/'+schema, template, function(err) {
-            if (err) {
-                console.log('failed to create template');
-            } else {
-                console.log('Creating template for ', file);
-                console.log(file, 'template has been created.');
-            }
-        });
+        //create template'
+        schema = schema.replace('.js', '.html');
+        createTemplate(file, schema, template);
     }
 })
