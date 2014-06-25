@@ -69,6 +69,7 @@ eden('sequence')
     var template     = [],
     startBlock       = "{{#block 'form/fieldset' ",
     endStartBlock    = '}}',
+    innerStartBlock  = '{{#block ',
     endBlock         = '}}',
     newLine          = '\n',
     tab              = '\t',
@@ -91,11 +92,22 @@ eden('sequence')
             //check if its select
             } else if(content[key].hasOwnProperty('enum')) {
                 field = key;
+
+                //if theres enum property, default is select
                 type  = 'select';
+                //otherwise, check if it has field property
+                //get its value
+                if(content[key].hasOwnProperty('field')) {
+                    type = content[key].field.toString();
+                }
+
                 //get items
                 for(var select in content[key].enum) {
                    data += content[key].enum[select] + '|';
                 }
+
+                data = eden('string').substr(data, 0, eden('string').size(data)-1);
+                
             } else if(content[key].hasOwnProperty('data')) {
                 //its a collection, recurse
                 _readKeys(content[key].data, schema);
@@ -123,7 +135,7 @@ eden('sequence')
 
                 //if its date then its datetime
                 } else if(eden('string').indexOf(field, 'date') !== -1) {
-                    type = 'datetime';
+                    type = 'date';
                 }
 
                 //get the name of the field
@@ -133,7 +145,7 @@ eden('sequence')
             //now we got all the data, lets add it to template
             //ignore if property is created or updated
             if(key === 'created' || key === 'updated') {
-                break;
+                continue;
             }
 
             //check if it has required property!
@@ -154,34 +166,64 @@ eden('sequence')
             switch(type) {
                 //for radio
                 case 'radio':
-                    template += '{{#block ' +'\'form/fieldset\' \''+title + required + '\' errors.'+field+'.message}}' +
-                    '\n\t{{#block '+ '\'field/'+type +'\' \'' +field+'\' ../'+ schema+'.'+field +'}}{{/block}}';
-                     template += '\n\t{{#block '+ '\'field/'+type +'\' \'' +field+'\' ../'+ schema+'.'+field +'}}{{/block}}' + '\n{{/block}}\n\n';
+                    template += newLine + tab
+                             +  startBlock 
+                             +  '\'' + title + required + '\' '
+                             +  'errors.' + field + '.message' 
+                             +  endStartBlock
+                                 +  newLine + tab + tab
+                                 +  innerStartBlock
+                                 +  '\'field/' + type +'\' '
+                                 +  '\'' + field  +  '\' '
+                                 +  '../'+ schema + '.' + field
+                                 +  endStartBlock
+                                 +  closerBlock
+                                 +  newLine + tab + tab
+                                 +  innerStartBlock
+                                 +  '\'field/' + type +'\' '
+                                 +  '\'' + field  +  '\' '
+                                 +  '../'+ schema + '.' + field
+                                 +  endStartBlock
+                                 +  closerBlock
+                             +  closerBlock
+                             +  newLine
                     break;
 
                 //for select
                 case 'select':
-                    data = eden('string').substr(data, 0, eden('string').size(data)-1);
-                    template += '{{#block ' +'\'form/fieldset\' \''+title + required + '\' errors.'+field+'.message}}' +
-                    '\n\t{{{block '+ '\'field/'+type +'\' \'' +field+ '\' \''+ data +'\' '+ schema+'.'+field +'}}}' + '\n{{/block}}\n\n';
+                    template += newLine + tab
+                             +  startBlock 
+                             +  '\'' + title + required + '\' '
+                             +  'errors.' + field + '.message' 
+                             +  endStartBlock
+                             +  newLine + tab + tab
+                             +  innerBlock
+                             +  '\'field/' + type +'\' '
+                             +  '\'' + field  +  '\' '
+                             +  '\'' + data   +  '\' '
+                             +  '../'+ schema + '.' + field
+                             +  innerCloserBlock
+                             +  newLine + tab
+                             +  closerBlock
+                             +  newLine;
                     break;
 
                 //default template
                 default:
                     //check if it has type before assigning it to templatenotp
                     if(content[key].hasOwnProperty('type')) {
-                        template += newLine
+                        template += newLine + tab
                                  +  startBlock 
                                  +  '\'' + title + required + '\' '
                                  +  'errors.' + field + '.message' 
                                  +  endStartBlock
-                                 +  newLine + tab
+                                 +  newLine + tab + tab
                                  +  innerBlock
                                  +  '\'field/' + type +'\' '
-                                 +  '\'' + field + '\' '
+                                 +  '\'' + field  + '\' '
                                  +  '../'+ schema + '.' + field
                                  +  innerCloserBlock
-                                 +  newLine
+                                 +  newLine + tab
                                  +  closerBlock
                                  +  newLine;
                         break;
