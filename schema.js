@@ -75,9 +75,9 @@ eden('sequence')
     tab              = '\t',
     innerBlock       = '{{{block ',
     innerCloserBlock = '}}}',
-    closerBlock      = '{{/block}}';
+    closerBlock      = '{{/block}}',
 
-    var innerForm    = false,
+    innerForm        = false,
     innerKey         = '';
 
     var _readKeys = function(content, schema) {
@@ -85,17 +85,14 @@ eden('sequence')
             var data = '',
             field    = '',
             required = '',
-            type     = '';
-
+            title    = '',
+            type     = '',
+            value    = '';
             //check if there's field property
             if(content[key].field !== undefined) {
                 type  = content[key].field;
-                field = key;
-
             //check if its select
             } else if(content[key].hasOwnProperty('enum')) {
-                field = key;
-
                 //if theres enum property, default is select
                 type  = 'select';
                 //otherwise, check if it has field property
@@ -155,19 +152,18 @@ eden('sequence')
                 } else if(eden('string').indexOf(field, 'date') !== -1) {
                     type = 'date';
                 }
-
-                //get the name of the field
-                field    = key;                                                            
-                //uppercase first letter of title
-                var title = eden('string').ucFirst(field);
-                var value = field;
-                if(innerForm) {
-                    field = innerKey + '[' + field + ']';
-                }
             }
-            
+
+            //get the field, title, value
+            field = key;            
+            title = eden('string').ucFirst(field);
+            value = field;
+            if(innerForm) {
+                field = innerKey + '[' + field + ']';
+            }
+
             //now we got all the data, lets add it to template
-            //ignore if property is created or updated
+            //ignore if field is created or updated
             if(key === 'created' || key === 'updated') {
                 continue;
             }
