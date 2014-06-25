@@ -4,9 +4,10 @@ var eden = require('./build/server/node_modules/edenjs/lib/index');
 //get schema if theres any
 var schemaFiles = eden('array').slice(process.argv, 2);
 
-var paths = require('./config');
-var data  = {};
-var fs    = require('fs');
+var paths = require('./config'),
+fs        = require('fs'),
+data      = {},
+fileCount = 0;
 
 eden('sequence')
 
@@ -30,6 +31,7 @@ eden('sequence')
         schemaFiles.forEach(function(file) {
             c++;
             fs.readFile(dir+file,'utf-8',function(err, schema) {
+                fileCount++;
                 if (err) {
                     console.log('invalid file');
                 }
@@ -47,8 +49,8 @@ eden('sequence')
             if (err) throw err;
             var c=0;
             files.forEach(function(file){
+                fileCount++;
                 c++;
-                console.log(file);
                 fs.readFile(dir+file,'utf-8',function(err, schema) {
                     if (err) {
                         console.log('invalid file');
@@ -66,8 +68,8 @@ eden('sequence')
 
 //loop through schema and get properties
 .then(function(next) {
-
-    //template handlebars
+    console.log('Creating Control...');
+    //create form template
     var template     = [],
     startBlock       = "{{#block 'form/fieldset' ",
     endStartBlock    = '}}',
@@ -309,11 +311,15 @@ eden('sequence')
 
     var createTemplate = function(file, template) {
         fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + '/' +'form.html', template, function(err) {
+            fileCount--;
             if (err) {
                 console.log('failed to create template');
             } else {
                 console.log(file, 'template has been created.');
-            }
+                if(fileCount === 0){
+                    next();
+                }
+            }            
         });
     }
 
@@ -339,4 +345,9 @@ eden('sequence')
         //create html template
         createTemplate(file, template);
     }
+})
+
+.then(function(next) {
+    console.log('Creating server...')
+    console.log('finished');
 })
