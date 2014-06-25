@@ -5,6 +5,7 @@ module.exports = {
     password    : { type: String, field:'password' },
     birthdate   : { type: Date },
     gender      : { type: String, enum: ['male', 'female', null], field: 'radio' },
+    gendertest      : { type: String, enum: ['male', 'female', null] },
     website     : { type: String },
     phone       : { type: String },
     address     : [{

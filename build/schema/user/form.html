@@ -21,8 +21,14 @@
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Gender' errors.gender.message}}
-		{{#block 'field/radio' 'gender' ../user.gender}}{{/block}}
-		{{#block 'field/radio' 'gender' ../user.gender}}{{/block}}{{/block}}
+		{{#block 'field/radio' 'gender' ../user.gender}}Male{{/block}}
+		{{#block 'field/radio' 'gender' ../user.gender}}Female{{/block}}
+		{{#block 'field/radio' 'gender' ../user.gender}}Null{{/block}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Gendertest' errors.gendertest.message}}
+		{{{block 'field/select' 'gendertest' 'male|female|null' ../user.gendertest}}}
+	{{/block}}
 
 	{{#block 'form/fieldset' 'Website' errors.website.message}}
 		{{{block 'field/text' 'website' ../user.website}}}
@@ -156,7 +162,8 @@
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Active' errors.active.message}}
-		{{#block 'field/radio' 'active' ../user.active}}{{/block}}
-		{{#block 'field/radio' 'active' ../user.active}}{{/block}}{{/block}}
+		{{#block 'field/radio' 'active' ../user.active}}True{{/block}}
+		{{#block 'field/radio' 'active' ../user.active}}False{{/block}}
+	{{/block}}
 
 </form>

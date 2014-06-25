@@ -91,6 +91,15 @@ eden('sequence')
             //check if there's field property
             if(content[key].field !== undefined) {
                 type  = content[key].field;
+
+                if(content[key].hasOwnProperty('enum')) {
+                //get items
+                for(var items in content[key].enum) {
+                   data += content[key].enum[items] + '|';
+                }
+                
+                data = eden('string').substr(data, 0, eden('string').size(data)-1);
+            }
             //check if its select
             } else if(content[key].hasOwnProperty('enum')) {
                 //if theres enum property, default is select
@@ -102,10 +111,10 @@ eden('sequence')
                 }
 
                 //get items
-                for(var select in content[key].enum) {
-                   data += content[key].enum[select] + '|';
+                for(var items in content[key].enum) {
+                   data += content[key].enum[items] + '|';
                 }
-
+                
                 data = eden('string').substr(data, 0, eden('string').size(data)-1);
 
             } else if(content[key].hasOwnProperty('data')) {
@@ -154,6 +163,7 @@ eden('sequence')
                 }
             }
 
+
             //get the field, title, value
             field = key;            
             title = eden('string').ucFirst(field);
@@ -186,23 +196,44 @@ eden('sequence')
                              +  startBlock 
                              +  '\'' + title + required + '\' '
                              +  'errors.' + value + '.message' 
-                             +  endStartBlock
+                             +  endStartBlock;
+
+                    if(data) {
+                        //if data is set, loop through it
+                        data = eden('string').split(data, '|');
+                        for (var i = 0; i < eden('array').size(data); i++) {
+                            template += newLine + tab + tab
+                                     +  innerStartBlock
+                                     +  '\'field/' + type +'\' '
+                                     +  '\'' + field  +  '\' '
+                                     +  '../'+ schema + '.' + value
+                                     +  endStartBlock
+                                     +  eden('string').ucFirst(data[i])
+                                     +  closerBlock;
+                        }
+                    } else {
+                        template += newLine + tab + tab
+                                 +  innerStartBlock
+                                 +  '\'field/' + type +'\' '
+                                 +  '\'' + field  +  '\' '
+                                 +  '../'+ schema + '.' + value
+                                 +  endStartBlock
+                                 +  'True'
+                                 +  closerBlock
+
                                  +  newLine + tab + tab
                                  +  innerStartBlock
                                  +  '\'field/' + type +'\' '
                                  +  '\'' + field  +  '\' '
                                  +  '../'+ schema + '.' + value
                                  +  endStartBlock
-                                 +  closerBlock
-                                 +  newLine + tab + tab
-                                 +  innerStartBlock
-                                 +  '\'field/' + type +'\' '
-                                 +  '\'' + field  +  '\' '
-                                 +  '../'+ schema + '.' + value
-                                 +  endStartBlock
-                                 +  closerBlock
+                                 +  'False'
+                                 +  closerBlock;
+                    }
+                    
+                    template += newLine + tab
                              +  closerBlock
-                             +  newLine
+                             +  newLine;
                     break;
 
                 //for select
