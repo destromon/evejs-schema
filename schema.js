@@ -77,6 +77,9 @@ eden('sequence')
     innerCloserBlock = '}}}',
     closerBlock      = '{{/block}}';
 
+    var innerForm    = false,
+    innerKey         = '';
+
     var _readKeys = function(content, schema) {
         for(var key in content) {
             var data = '',
@@ -119,6 +122,8 @@ eden('sequence')
                 } else {
                     //if its not a key
                     if(key != 0) {
+                        innerForm = true;
+                        innerKey  = key;
                         template += newLine + '<hr />' 
                                  +  newLine + startBlock
                                  +  '\'' + 'Start: Template for ' 
@@ -133,6 +138,7 @@ eden('sequence')
                                  +  eden('string').ucFirst(key) + '\' '
                                  +  endBlock + closerBlock 
                                  +  newLine + '<hr/ >' + newLine;
+                        innerForm = false;
                     }
                 }
 
@@ -151,7 +157,13 @@ eden('sequence')
                 }
 
                 //get the name of the field
-                field = key;
+                field    = key;                                                            
+                //uppercase first letter of title
+                var title = eden('string').ucFirst(field);
+                var value = field;
+                if(innerForm) {
+                    field = innerKey + '[' + field + ']';
+                }
             }
             
             //now we got all the data, lets add it to template
@@ -170,10 +182,6 @@ eden('sequence')
                 //_readKeys(content[key], schema);
             }
 
-
-            //uppercase first letter of title
-            var title = eden('string').ucFirst(field);
-
             //check field type and assign it to template
             switch(type) {
                 //for radio
@@ -181,20 +189,20 @@ eden('sequence')
                     template += newLine + tab
                              +  startBlock 
                              +  '\'' + title + required + '\' '
-                             +  'errors.' + field + '.message' 
+                             +  'errors.' + value + '.message' 
                              +  endStartBlock
                                  +  newLine + tab + tab
                                  +  innerStartBlock
                                  +  '\'field/' + type +'\' '
                                  +  '\'' + field  +  '\' '
-                                 +  '../'+ schema + '.' + field
+                                 +  '../'+ schema + '.' + value
                                  +  endStartBlock
                                  +  closerBlock
                                  +  newLine + tab + tab
                                  +  innerStartBlock
                                  +  '\'field/' + type +'\' '
                                  +  '\'' + field  +  '\' '
-                                 +  '../'+ schema + '.' + field
+                                 +  '../'+ schema + '.' + value
                                  +  endStartBlock
                                  +  closerBlock
                              +  closerBlock
@@ -206,14 +214,14 @@ eden('sequence')
                     template += newLine + tab
                              +  startBlock 
                              +  '\'' + title + required + '\' '
-                             +  'errors.' + field + '.message' 
+                             +  'errors.' + value + '.message' 
                              +  endStartBlock
                              +  newLine + tab + tab
                              +  innerBlock
                              +  '\'field/' + type +'\' '
                              +  '\'' + field  +  '\' '
                              +  '\'' + data   +  '\' '
-                             +  '../'+ schema + '.' + field
+                             +  '../'+ schema + '.' + value
                              +  innerCloserBlock
                              +  newLine + tab
                              +  closerBlock
@@ -227,13 +235,13 @@ eden('sequence')
                         template += newLine + tab
                                  +  startBlock 
                                  +  '\'' + title + required + '\' '
-                                 +  'errors.' + field + '.message' 
+                                 +  'errors.' + value + '.message' 
                                  +  endStartBlock
                                  +  newLine + tab + tab
                                  +  innerBlock
                                  +  '\'field/' + type +'\' '
                                  +  '\'' + field  + '\' '
-                                 +  '../'+ schema + '.' + field
+                                 +  '../'+ schema + '.' + value
                                  +  innerCloserBlock
                                  +  newLine + tab
                                  +  closerBlock

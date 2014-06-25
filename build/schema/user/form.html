@@ -12,16 +12,16 @@
 		{{{block 'field/text' 'email' ../user.email}}}
 	{{/block}}
 
-	{{#block 'form/fieldset' 'Password' errors.password.message}}
-		{{{block 'field/password' 'password' ../user.password}}}
+	{{#block 'form/fieldset' 'Email' errors.email.message}}
+		{{{block 'field/password' 'password' ../user.email}}}
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Birthdate' errors.birthdate.message}}
 		{{{block 'field/date' 'birthdate' ../user.birthdate}}}
 	{{/block}}
 
-	{{#block 'form/fieldset' 'Gender' errors.gender.message}}
-		{{{block 'field/select' 'gender' 'male|female|null' ../user.gender}}}
+	{{#block 'form/fieldset' 'Birthdate' errors.birthdate.message}}
+		{{{block 'field/select' 'gender' 'male|female|null' ../user.birthdate}}}
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Website' errors.website.message}}
@@ -35,43 +35,43 @@
 <hr />
 {{#block 'form/fieldset' 'Start: Template for Address' }}{{/block}}
 	{{#block 'form/fieldset' 'Label' errors.label.message}}
-		{{{block 'field/text' 'label' ../address.label}}}
+		{{{block 'field/text' 'address[label]' ../address.label}}}
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Contact' errors.contact.message}}
-		{{{block 'field/text' 'contact' ../address.contact}}}
+		{{{block 'field/text' 'address[contact]' ../address.contact}}}
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Street' errors.street.message}}
-		{{{block 'field/text' 'street' ../address.street}}}
+		{{{block 'field/text' 'address[street]' ../address.street}}}
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Neighborhood' errors.neighborhood.message}}
-		{{{block 'field/text' 'neighborhood' ../address.neighborhood}}}
+		{{{block 'field/text' 'address[neighborhood]' ../address.neighborhood}}}
 	{{/block}}
 
 	{{#block 'form/fieldset' 'City' errors.city.message}}
-		{{{block 'field/text' 'city' ../address.city}}}
+		{{{block 'field/text' 'address[city]' ../address.city}}}
 	{{/block}}
 
 	{{#block 'form/fieldset' 'State' errors.state.message}}
-		{{{block 'field/text' 'state' ../address.state}}}
+		{{{block 'field/text' 'address[state]' ../address.state}}}
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Region' errors.region.message}}
-		{{{block 'field/text' 'region' ../address.region}}}
+		{{{block 'field/text' 'address[region]' ../address.region}}}
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Country' errors.country.message}}
-		{{{block 'field/text' 'country' ../address.country}}}
+		{{{block 'field/text' 'address[country]' ../address.country}}}
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Postal' errors.postal.message}}
-		{{{block 'field/text' 'postal' ../address.postal}}}
+		{{{block 'field/text' 'address[postal]' ../address.postal}}}
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Phone' errors.phone.message}}
-		{{{block 'field/text' 'phone' ../address.phone}}}
+		{{{block 'field/text' 'address[phone]' ../address.phone}}}
 	{{/block}}
 
 {{#block 'form/fieldset' 'End: Template for Address' }}{{/block}}
@@ -80,39 +80,39 @@
 <hr />
 {{#block 'form/fieldset' 'Start: Template for Company' }}{{/block}}
 	{{#block 'form/fieldset' 'Name' errors.name.message}}
-		{{{block 'field/text' 'name' ../company.name}}}
+		{{{block 'field/text' 'company[name]' ../company.name}}}
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Title' errors.title.message}}
-		{{{block 'field/text' 'title' ../company.title}}}
+		{{{block 'field/text' 'company[title]' ../company.title}}}
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Street' errors.street.message}}
-		{{{block 'field/text' 'street' ../company.street}}}
+		{{{block 'field/text' 'company[street]' ../company.street}}}
 	{{/block}}
 
 	{{#block 'form/fieldset' 'City' errors.city.message}}
-		{{{block 'field/text' 'city' ../company.city}}}
+		{{{block 'field/text' 'company[city]' ../company.city}}}
 	{{/block}}
 
 	{{#block 'form/fieldset' 'State' errors.state.message}}
-		{{{block 'field/text' 'state' ../company.state}}}
+		{{{block 'field/text' 'company[state]' ../company.state}}}
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Country' errors.country.message}}
-		{{{block 'field/text' 'country' ../company.country}}}
+		{{{block 'field/text' 'company[country]' ../company.country}}}
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Postal' errors.postal.message}}
-		{{{block 'field/text' 'postal' ../company.postal}}}
+		{{{block 'field/text' 'company[postal]' ../company.postal}}}
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Phone' errors.phone.message}}
-		{{{block 'field/text' 'phone' ../company.phone}}}
+		{{{block 'field/text' 'company[phone]' ../company.phone}}}
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Email' errors.email.message}}
-		{{{block 'field/text' 'email' ../company.email}}}
+		{{{block 'field/text' 'company[email]' ../company.email}}}
 	{{/block}}
 
 {{#block 'form/fieldset' 'End: Template for Company' }}{{/block}}
@@ -121,19 +121,19 @@
 <hr />
 {{#block 'form/fieldset' 'Start: Template for Photo' }}{{/block}}
 	{{#block 'form/fieldset' 'Name' errors.name.message}}
-		{{{block 'field/text' 'name' ../photo.name}}}
+		{{{block 'field/text' 'photo[name]' ../photo.name}}}
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Source' errors.source.message}}
-		{{{block 'field/text' 'source' ../photo.source}}}
+		{{{block 'field/text' 'photo[source]' ../photo.source}}}
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Mime' errors.mime.message}}
-		{{{block 'field/text' 'mime' ../photo.mime}}}
+		{{{block 'field/text' 'photo[mime]' ../photo.mime}}}
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Date' errors.date.message}}
-		{{{block 'field/date' 'date' ../photo.date}}}
+		{{{block 'field/date' 'photo[date]' ../photo.date}}}
 	{{/block}}
 
 {{#block 'form/fieldset' 'End: Template for Photo' }}{{/block}}
