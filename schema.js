@@ -1,5 +1,5 @@
 //require denpendancies
-var eden = require('./build/server/node_modules/edenjs/lib/index');
+var eden      = require('./build/server/node_modules/edenjs/lib/index');
 
 //get schema if theres any
 var schemaFiles = eden('array').slice(process.argv, 2);
@@ -312,9 +312,9 @@ eden('sequence')
         fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + '/control' + '/' +'form.html', template, function(err) {
             fileCount--;
             if (err) {
-                console.log('failed to create template');
+                console.log('failed to create',file, 'template');
             } else {
-                console.log(file, 'template has been created.');
+                console.log(file, 'form template has been created.');
                 if(fileCount === 0){
                     next();
                 }
@@ -322,14 +322,36 @@ eden('sequence')
         });
     }
 
-    //loop through schema folder
     var subSequence = eden('sequence');
 
+    var createIndexTemplate = function(file) {
+        console.log('Creating index page for', file);
+
+        subSequence.then(function(subNextIndex) {
+            fs.readFile(paths.dev + paths.template + '/index.html', 'utf-8', function(err, data){
+                var indexTemplate = data;
+                indexTemplate     =  eden('string').replace(indexTemplate, 'temp', file);
+                subNextIndex(file, indexTemplate);
+            });
+        });
+        subSequence.then(function(file, indexTemplate, subNext) {
+            fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + '/control/' + 'index.html', indexTemplate, function(err) {
+                if (err) {
+                    console.log('failed to create',file, 'template');
+                } else {
+                    console.log(file, 'index template has been created.');
+                    subNext();
+                }          
+            });
+        })
+        
+    }
+    //loop through schema folder
     for(var schemas in data)  {
+
         (function(){ 
             var schema = schemas;
             subSequence.then(function(subNext) {
-            console.log('getting', schema);
             //get file name        
             var file = schema.toString();
             file     = eden('string').substring(file, 0, eden('string').size(file)-3),
@@ -339,6 +361,8 @@ eden('sequence')
             template = '<form method="post" class="form-horizontal">\n';
             subNext(file, content);
             });
+
+            //create control folder
             subSequence.then(function(file, content, subNext) {
                 console.log('Creating control folder for', file, 'package');
                 eden('folder', paths.dev + '/' + paths.schema + '/' + file + '/control')
@@ -346,6 +370,8 @@ eden('sequence')
                     subNext(file, content);
                 });
             });
+
+            //create server folder
             subSequence.then(function(file, content, subNext) {
                 console.log('Creating server folder for', file, 'package');
                 eden('folder', paths.dev + '/' + paths.schema + '/' + file + '/server')
@@ -353,9 +379,12 @@ eden('sequence')
                     subNext(file, content);
                 });
             });
+
+            //read properties and create template
             subSequence.then(function(file, content, next) {
                 _readKeys(content, file);
-                createTemplate(file, template);            
+                createTemplate(file, template);
+                createIndexTemplate(file);
                 next();
             });
         })(schemas);

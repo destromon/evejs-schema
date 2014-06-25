@@ -1,0 +1,43 @@
+<form method="post" class="form-horizontal">
+
+	{{#block 'form/fieldset' 'Slug <span>*</span>' errors.slug.message}}
+		{{{block 'field/text' 'slug' ../post.slug}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Title <span>*</span>' errors.title.message}}
+		{{{block 'field/text' 'title' ../post.title}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Detail <span>*</span>' errors.detail.message}}
+		{{{block 'field/wysiwyg' 'detail' ../post.detail}}}
+	{{/block}}
+
+<hr />
+{{#block 'form/fieldset' 'Start: Template for Revision' }}{{/block}}
+	{{#block 'form/fieldset' 'Title' errors.title.message}}
+		{{{block 'field/text' 'revision[title]' ../revision.title}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Detail' errors.detail.message}}
+		{{{block 'field/wysiwyg' 'revision[detail]' ../revision.detail}}}
+	{{/block}}
+
+{{#block 'form/fieldset' 'End: Template for Revision' }}{{/block}}
+<hr/ >
+
+	{{#block 'form/fieldset' 'Status' errors.status.message}}
+		{{{block 'field/select' 'status' 'draft|review|published|other' ../post.status}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Visibility' errors.visibility.message}}
+		{{{block 'field/select' 'visibility' 'public|private' ../post.visibility}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Active' errors.active.message}}
+		{{#block 'field/radio' 'active' ../post.active}}True{{/block}}
+		{{#block 'field/radio' 'active' ../post.active}}False{{/block}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Published' errors.published.message}}
+		{{{block 'field/date' 'published' ../post.published}}}
+	{{/block}}
