@@ -81,6 +81,7 @@ eden('sequence')
     innerKey         = '';
 
     var setTemplate = function(data, field, schema, value, title, required, type) {
+        //set template accoding to type
         if(type === 'checkbox' || type === 'radio') {
             template += newLine + tab
                 +  startBlock 
@@ -124,8 +125,8 @@ eden('sequence')
             template += newLine + tab
                 +  closerBlock
                 +  newLine;
-            
         } else if(type === 'select') {
+            //template for select
             template += newLine + tab
                 +  startBlock 
                 +  '\'' + title + required + '\' '
@@ -142,6 +143,7 @@ eden('sequence')
                 +  closerBlock
                 +  newLine;
         } else {
+            //default template
             template += newLine + tab
                 +  startBlock 
                 +  '\'' + title + required + '\' '
@@ -242,11 +244,12 @@ eden('sequence')
                 }
             }
 
-
             //get the field, title, value
             field = key;            
             title = eden('string').ucFirst(field);
             value = field;
+
+            //if its a collection, add collection name
             if(innerForm) {
                 field = innerKey + '[' + field + ']';
             }
@@ -285,7 +288,7 @@ eden('sequence')
 
                 //default template
                 default:
-                    //check if it has type before assigning it to templatenotp
+                    //check if it has type before assigning it to template
                     if(content[key].hasOwnProperty('type')) {
                         setTemplate(data, field, schema, value, title, required, type);
                         break;
