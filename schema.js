@@ -34,6 +34,7 @@ eden('sequence')
                 fileCount++;
                 if (err) {
                     console.log('invalid file');
+                    return;
                 }
 
                 data[file]=schema;
@@ -54,6 +55,7 @@ eden('sequence')
                 fs.readFile(dir+file,'utf-8',function(err, schema) {
                     if (err) {
                         console.log('invalid file');
+                        return;
                     }
 
                     data[file]=schema;
@@ -308,47 +310,52 @@ eden('sequence')
         }
     };
 
+    var subSequence = eden('sequence');
+
     var createTemplate = function(file, template) {
         fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + '/control' + '/' +'form.html', template, function(err) {
             fileCount--;
             if (err) {
                 console.log('failed to create',file, 'template');
             } else {
-                console.log(file, 'form template has been created.');
-                if(fileCount === 0){
+                console.log(file, 'Form template has been created.');
+                if(fileCount === 0) {
                     next();
                 }
             }            
         });
     }
 
-    var subSequence = eden('sequence');
-
     var createIndexTemplate = function(file) {
-        console.log('Creating index page for', file);
+        console.log('Creating Index page for', file);
 
-        subSequence.then(function(subNextIndex) {
+        //read template
+        subSequence.then(function(subNext) {
             fs.readFile(paths.dev + paths.template + '/index.html', 'utf-8', function(err, data){
                 var indexTemplate = data;
                 indexTemplate     =  eden('string').replace(indexTemplate, 'temp', file);
-                subNextIndex(file, indexTemplate);
+                subNext(file, indexTemplate);
             });
-        });
-        subSequence.then(function(file, indexTemplate, subNext) {
+        })
+        //create index template
+        .then(function(file, indexTemplate, subNext) {
             fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + '/control/' + 'index.html', indexTemplate, function(err) {
                 if (err) {
                     console.log('failed to create',file, 'template');
                 } else {
-                    console.log(file, 'index template has been created.');
+                    console.log(file, 'Index template has been created.');
                     subNext();
                 }          
             });
-        })
-        
-    }
+        });
+    };
+
+    var createServerEvent = function(file) {
+        console.log('Creating Server Event for', file);
+    };
+
     //loop through schema folder
     for(var schemas in data)  {
-
         (function(){ 
             var schema = schemas;
             subSequence.then(function(subNext) {
@@ -360,38 +367,38 @@ eden('sequence')
             //reset template
             template = '<form method="post" class="form-horizontal">\n';
             subNext(file, content);
-            });
+            })
 
             //create control folder
-            subSequence.then(function(file, content, subNext) {
-                console.log('Creating control folder for', file, 'package');
+            .then(function(file, content, subNext) {
+                console.log('Creating Control folder for', file, 'package');
                 eden('folder', paths.dev + '/' + paths.schema + '/' + file + '/control')
                 .mkdir(0777, function(err) {
                     subNext(file, content);
                 });
-            });
+            })
 
             //create server folder
-            subSequence.then(function(file, content, subNext) {
-                console.log('Creating server folder for', file, 'package');
+            .then(function(file, content, subNext) {
+                console.log('Creating Server folder for', file, 'package');
                 eden('folder', paths.dev + '/' + paths.schema + '/' + file + '/server')
                 .mkdir(0777, function(err) {
                     subNext(file, content);
                 });
-            });
+            })
 
             //read properties and create template
-            subSequence.then(function(file, content, next) {
+            .then(function(file, content, subNext) {
                 _readKeys(content, file);
                 createTemplate(file, template);
                 createIndexTemplate(file);
-                next();
+                subNext(file);
+
+            //create server template
+            }).then(function(file, subNext) {
+                createServerEvent(file);
+                subNext();
             });
         })(schemas);
     }
-})
-
-.then(function(next) {
-    console.log('creating index event...');
-
-})
+}); 
