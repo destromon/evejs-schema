@@ -66,9 +66,8 @@ eden('sequence')
     }
 })
 
-//loop through schema and get properties
+//loop through schema file and get properties
 .then(function(next) {
-    console.log('Creating Control...');
     //create form template
     var template     = [],
     startBlock       = "{{#block 'form/fieldset' ",
@@ -310,7 +309,7 @@ eden('sequence')
     };
 
     var createTemplate = function(file, template) {
-        fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + '/' +'form.html', template, function(err) {
+        fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + '/control' + '/' +'form.html', template, function(err) {
             fileCount--;
             if (err) {
                 console.log('failed to create template');
@@ -324,30 +323,46 @@ eden('sequence')
     }
 
     //loop through schema folder
-    for(var schema in data)  {
-        //require schema
-        var content = require('./schema/' + schema);
+    var subSequence = eden('sequence');
 
-        //reset template
-        template = '<form method="post" class="form-horizontal">\n';
+    for(var schemas in data)  {
+        (function(){ 
+            var schema = schemas;
+            subSequence.then(function(subNext) {
+            console.log('getting', schema);
+            //get file name        
+            var file = schema.toString();
+            file     = eden('string').substring(file, 0, eden('string').size(file)-3),
+            content  = require('./schema/' + schema);
 
-        //get file name        
-        var file = schema.toString();
-        file     = eden('string').substring(file, 0, eden('string').size(file)-3);
-        eden('folder', paths.dev + '/' + paths.schema + '/' + file).mkdir(0777, function(err) {});
-        
-        //traverse through property
-        _readKeys(content, file);
-        
-        schema   = eden('string').replace(schema, '.js', '.html');
-        template += '\n</form>';
-
-        //create html template
-        createTemplate(file, template);
+            //reset template
+            template = '<form method="post" class="form-horizontal">\n';
+            subNext(file, content);
+            });
+            subSequence.then(function(file, content, subNext) {
+                console.log('Creating control folder for', file, 'package');
+                eden('folder', paths.dev + '/' + paths.schema + '/' + file + '/control')
+                .mkdir(0777, function(err) {
+                    subNext(file, content);
+                });
+            });
+            subSequence.then(function(file, content, subNext) {
+                console.log('Creating server folder for', file, 'package');
+                eden('folder', paths.dev + '/' + paths.schema + '/' + file + '/server')
+                .mkdir(0777, function(err) {
+                    subNext(file, content);
+                });
+            });
+            subSequence.then(function(file, content, next) {
+                _readKeys(content, file);
+                createTemplate(file, template);            
+                next();
+            });
+        })(schemas);
     }
 })
 
 .then(function(next) {
-    console.log('Creating server...')
-    console.log('finished');
+    console.log('creating index event...');
+
 })
