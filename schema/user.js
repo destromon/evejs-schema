@@ -36,9 +36,9 @@ module.exports = {
     
     photo       : [{
         data : {
-            name        : String,
-            source      : String,
-            mime        : String,
+            name        : { type: String },
+            source      : { type: String },
+            mime        : { type: String },
             date        : { type: Date, default: Date.now }
         }
     }],

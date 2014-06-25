@@ -107,7 +107,7 @@ eden('sequence')
                 }
 
                 data = eden('string').substr(data, 0, eden('string').size(data)-1);
-                
+
             } else if(content[key].hasOwnProperty('data')) {
                 //its a collection, recurse
                 _readKeys(content[key].data, schema);
@@ -119,8 +119,20 @@ eden('sequence')
                 } else {
                     //if its not a key
                     if(key != 0) {
+                        template += newLine + '<hr />' 
+                                 +  newLine + startBlock
+                                 +  '\'' + 'Start: Template for ' 
+                                 +  eden('string').ucFirst(key) + '\' '
+                                 +  endBlock + closerBlock;
+
                         //its a collection, recurse
-                        _readKeys(content[key], key);    
+                        _readKeys(content[key], key);
+
+                        template += newLine + startBlock
+                                 +  '\'' + 'End: Template for ' 
+                                 +  eden('string').ucFirst(key) + '\' '
+                                 +  endBlock + closerBlock 
+                                 +  newLine + '<hr/ >' + newLine;
                     }
                 }
 

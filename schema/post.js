@@ -16,17 +16,5 @@ revision: [{
     active      : { type: Boolean, default: true },
     published   : { type: Date, default: Date.now },
     created     : { type: Date, default: Date.now },
-    updated     : { type: Date, default: Date.now },
-
-    autocomplete : { type: String, field: 'autocomplete' },
-    button       : { type: String, field: 'button' },
-    checkbox     : { type: String, field: 'checkbox' },
-    color        : { type: String, field: 'color' },
-    combobox     : { type: String, field: 'combobox' },
-    file         : { type: String, field: 'file' },
-    tag          : { type: String, field: 'tag' },
-    textarea     : { type: String, field: 'textarea' },
-    wysiwyg      : { type: String, field: 'wysiwyg' },
-    country      : { type: String, field: 'country' }
-
+    updated     : { type: Date, default: Date.now }
 };
