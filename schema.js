@@ -80,6 +80,86 @@ eden('sequence')
     innerForm        = false,
     innerKey         = '';
 
+    var setTemplate = function(data, field, schema, value, title, required, type) {
+        if(type === 'checkbox' || type === 'radio') {
+            template += newLine + tab
+                +  startBlock 
+                +  '\'' + title + required + '\' '
+                +  'errors.' + value + '.message' 
+                +  endStartBlock;
+
+            if(data) {
+                //if data is set, loop through it
+                data = eden('string').split(data, '|');
+                for (var i = 0; i < eden('array').size(data); i++) {
+                    template += newLine + tab + tab
+                        +  innerStartBlock
+                        +  '\'field/' + type +'\' '
+                        +  '\'' + field  +  '\' '
+                        +  '../'+ schema + '.' + value
+                        +  endStartBlock
+                        +  eden('string').ucFirst(data[i])
+                        +  closerBlock;
+                }
+            } else {
+                template += newLine + tab + tab
+                    +  innerStartBlock
+                    +  '\'field/' + type +'\' '
+                    +  '\'' + field  +  '\' '
+                    +  '../'+ schema + '.' + value
+                    +  endStartBlock
+                    +  'True'
+                    +  closerBlock
+
+                    +  newLine + tab + tab
+                    +  innerStartBlock
+                    +  '\'field/' + type +'\' '
+                    +  '\'' + field  +  '\' '
+                    +  '../'+ schema + '.' + value
+                    +  endStartBlock
+                    +  'False'
+                    +  closerBlock;
+            }
+            
+            template += newLine + tab
+                +  closerBlock
+                +  newLine;
+            
+        } else if(type === 'select') {
+            template += newLine + tab
+                +  startBlock 
+                +  '\'' + title + required + '\' '
+                +  'errors.' + value + '.message' 
+                +  endStartBlock
+                +  newLine + tab + tab
+                +  innerBlock
+                +  '\'field/' + type +'\' '
+                +  '\'' + field  +  '\' '
+                +  '\'' + data   +  '\' '
+                +  '../'+ schema + '.' + value
+                +  innerCloserBlock
+                +  newLine + tab
+                +  closerBlock
+                +  newLine;
+        } else {
+            template += newLine + tab
+                +  startBlock 
+                +  '\'' + title + required + '\' '
+                +  'errors.' + value + '.message' 
+                +  endStartBlock
+                +  newLine + tab + tab
+                +  innerBlock
+                +  '\'field/' + type +'\' '
+                +  '\'' + field  + '\' '
+                +  '../'+ schema + '.' + value
+                +  innerCloserBlock
+                +  newLine + tab
+                +  closerBlock
+                +  newLine;
+        }
+        
+    };
+
     var _readKeys = function(content, schema) {
         for(var key in content) {
             var data = '',
@@ -91,7 +171,6 @@ eden('sequence')
             //check if there's field property
             if(content[key].field !== undefined) {
                 type  = content[key].field;
-
                 if(content[key].hasOwnProperty('enum')) {
                 //get items
                 for(var items in content[key].enum) {
@@ -192,87 +271,23 @@ eden('sequence')
             switch(type) {
                 //for radio
                 case 'radio':
-                    template += newLine + tab
-                             +  startBlock 
-                             +  '\'' + title + required + '\' '
-                             +  'errors.' + value + '.message' 
-                             +  endStartBlock;
-
-                    if(data) {
-                        //if data is set, loop through it
-                        data = eden('string').split(data, '|');
-                        for (var i = 0; i < eden('array').size(data); i++) {
-                            template += newLine + tab + tab
-                                     +  innerStartBlock
-                                     +  '\'field/' + type +'\' '
-                                     +  '\'' + field  +  '\' '
-                                     +  '../'+ schema + '.' + value
-                                     +  endStartBlock
-                                     +  eden('string').ucFirst(data[i])
-                                     +  closerBlock;
-                        }
-                    } else {
-                        template += newLine + tab + tab
-                                 +  innerStartBlock
-                                 +  '\'field/' + type +'\' '
-                                 +  '\'' + field  +  '\' '
-                                 +  '../'+ schema + '.' + value
-                                 +  endStartBlock
-                                 +  'True'
-                                 +  closerBlock
-
-                                 +  newLine + tab + tab
-                                 +  innerStartBlock
-                                 +  '\'field/' + type +'\' '
-                                 +  '\'' + field  +  '\' '
-                                 +  '../'+ schema + '.' + value
-                                 +  endStartBlock
-                                 +  'False'
-                                 +  closerBlock;
-                    }
-                    
-                    template += newLine + tab
-                             +  closerBlock
-                             +  newLine;
+                    setTemplate(data, field, schema, value, title, required, type);
                     break;
 
+                //for checkbox
+                case 'checkbox':
+                    setTemplate(data, field, schema, value, title, required, type);
+                    break;
                 //for select
                 case 'select':
-                    template += newLine + tab
-                             +  startBlock 
-                             +  '\'' + title + required + '\' '
-                             +  'errors.' + value + '.message' 
-                             +  endStartBlock
-                             +  newLine + tab + tab
-                             +  innerBlock
-                             +  '\'field/' + type +'\' '
-                             +  '\'' + field  +  '\' '
-                             +  '\'' + data   +  '\' '
-                             +  '../'+ schema + '.' + value
-                             +  innerCloserBlock
-                             +  newLine + tab
-                             +  closerBlock
-                             +  newLine;
+                    setTemplate(data, field, schema, value, title, required, type);
                     break;
 
                 //default template
                 default:
                     //check if it has type before assigning it to templatenotp
                     if(content[key].hasOwnProperty('type')) {
-                        template += newLine + tab
-                                 +  startBlock 
-                                 +  '\'' + title + required + '\' '
-                                 +  'errors.' + value + '.message' 
-                                 +  endStartBlock
-                                 +  newLine + tab + tab
-                                 +  innerBlock
-                                 +  '\'field/' + type +'\' '
-                                 +  '\'' + field  + '\' '
-                                 +  '../'+ schema + '.' + value
-                                 +  innerCloserBlock
-                                 +  newLine + tab
-                                 +  closerBlock
-                                 +  newLine;
+                        setTemplate(data, field, schema, value, title, required, type);
                         break;
                     }
             }

@@ -26,8 +26,15 @@
 		{{#block 'field/radio' 'gender' ../user.gender}}Null{{/block}}
 	{{/block}}
 
-	{{#block 'form/fieldset' 'Gendertest' errors.gendertest.message}}
-		{{{block 'field/select' 'gendertest' 'male|female|null' ../user.gendertest}}}
+	{{#block 'form/fieldset' 'Food' errors.food.message}}
+		{{#block 'field/checkbox' 'food' ../user.food}}Meat{{/block}}
+		{{#block 'field/checkbox' 'food' ../user.food}}Veggy{{/block}}
+		{{#block 'field/checkbox' 'food' ../user.food}}Seafood{{/block}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Foodtrip' errors.foodtrip.message}}
+		{{#block 'field/checkbox' 'foodtrip' ../user.foodtrip}}True{{/block}}
+		{{#block 'field/checkbox' 'foodtrip' ../user.foodtrip}}False{{/block}}
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Website' errors.website.message}}
