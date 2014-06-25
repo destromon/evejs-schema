@@ -66,6 +66,8 @@ eden('sequence')
 
 //loop through schema and get properties
 .then(function(next) {
+
+    //template handlebars
     var template     = [],
     startBlock       = "{{#block 'form/fieldset' ",
     endStartBlock    = '}}',
@@ -83,6 +85,8 @@ eden('sequence')
     var setTemplate = function(data, field, schema, value, title, required, type) {
         //set template accoding to type
         if(type === 'checkbox' || type === 'radio') {
+            
+            //start template block
             template += newLine + tab
                 +  startBlock 
                 +  '\'' + title + required + '\' '
@@ -111,7 +115,6 @@ eden('sequence')
                     +  endStartBlock
                     +  'True'
                     +  closerBlock
-
                     +  newLine + tab + tab
                     +  innerStartBlock
                     +  '\'field/' + type +'\' '
@@ -121,7 +124,8 @@ eden('sequence')
                     +  'False'
                     +  closerBlock;
             }
-            
+
+            //close template block
             template += newLine + tab
                 +  closerBlock
                 +  newLine;
@@ -170,21 +174,26 @@ eden('sequence')
             title    = '',
             type     = '',
             value    = '';
+
             //check if there's field property
             if(content[key].field !== undefined) {
                 type  = content[key].field;
                 if(content[key].hasOwnProperty('enum')) {
-                //get items
-                for(var items in content[key].enum) {
-                   data += content[key].enum[items] + '|';
+
+                    //get items
+                    for(var items in content[key].enum) {
+                       data += content[key].enum[items] + '|';
+                    }
+                    
+                    data = eden('string').substr(data, 0, eden('string').size(data)-1);
                 }
-                
-                data = eden('string').substr(data, 0, eden('string').size(data)-1);
-            }
+
             //check if its select
             } else if(content[key].hasOwnProperty('enum')) {
+                
                 //if theres enum property, default is select
                 type  = 'select';
+                
                 //otherwise, check if it has field property
                 //get its value
                 if(content[key].hasOwnProperty('field')) {
@@ -197,16 +206,18 @@ eden('sequence')
                 }
                 
                 data = eden('string').substr(data, 0, eden('string').size(data)-1);
-
             } else if(content[key].hasOwnProperty('data')) {
+                
                 //its a collection, recurse
                 _readKeys(content[key].data, schema);
             } else {
+                
                 //get field according to 'type' property
                 if(content[key].hasOwnProperty('type')) {
                     field = content[key].type.toString();
                     field = eden('string').toLowerCase(field);
                 } else {
+                    
                     //if its not a key
                     if(key != 0) {
                         innerForm = true;
@@ -267,7 +278,6 @@ eden('sequence')
                 if (content[key].data.hasOwnProperty('required')){
                     required = ' <span>*</span>';
                 }
-                //_readKeys(content[key], schema);
             }
 
             //check field type and assign it to template

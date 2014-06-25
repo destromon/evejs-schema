@@ -5,8 +5,6 @@ module.exports = {
     password    : { type: String, field:'password' },
     birthdate   : { type: Date },
     gender      : { type: String, enum: ['male', 'female', null], field: 'radio' },
-    food        : { type: String, enum: ['meat', 'veggy', 'seafood'], field: 'checkbox' },
-    foodtrip    : { type: String, field: 'checkbox' },
     website     : { type: String },
     phone       : { type: String },
     address     : [{

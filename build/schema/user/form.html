@@ -26,17 +26,6 @@
 		{{#block 'field/radio' 'gender' ../user.gender}}Null{{/block}}
 	{{/block}}
 
-	{{#block 'form/fieldset' 'Food' errors.food.message}}
-		{{#block 'field/checkbox' 'food' ../user.food}}Meat{{/block}}
-		{{#block 'field/checkbox' 'food' ../user.food}}Veggy{{/block}}
-		{{#block 'field/checkbox' 'food' ../user.food}}Seafood{{/block}}
-	{{/block}}
-
-	{{#block 'form/fieldset' 'Foodtrip' errors.foodtrip.message}}
-		{{#block 'field/checkbox' 'foodtrip' ../user.foodtrip}}True{{/block}}
-		{{#block 'field/checkbox' 'foodtrip' ../user.foodtrip}}False{{/block}}
-	{{/block}}
-
 	{{#block 'form/fieldset' 'Website' errors.website.message}}
 		{{{block 'field/text' 'website' ../user.website}}}
 	{{/block}}
