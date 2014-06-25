@@ -4,7 +4,7 @@ module.exports = {
     email       : { type: String, required: true },
     password    : { type: String, field:'password' },
     birthdate   : { type: Date },
-    gender      : { type: String, enum: ['male', 'female', null] },
+    gender      : { type: String, enum: ['male', 'female', null], field: 'radio' },
     website     : { type: String },
     phone       : { type: String },
     address     : [{
@@ -16,7 +16,7 @@ module.exports = {
             city            : { type: String }, 
             state           : { type: String }, 
             region          : { type: String }, 
-            country         : { type: String }, 
+            country         : { type: String, field: 'country'}, 
             postal          : { type: String }, 
             phone           : { type: String }
         }
@@ -28,7 +28,7 @@ module.exports = {
         street  : { type: String },
         city    : { type: String },
         state   : { type: String },
-        country : { type: String },
+        country : { type: String, field: 'country'},
         postal  : { type: String },
         phone   : { type: String },
         email   : { type: String },
@@ -37,7 +37,7 @@ module.exports = {
     photo       : [{
         data : {
             name        : { type: String },
-            source      : { type: String },
+            source      : { type: String, field: 'file' },
             mime        : { type: String },
             date        : { type: Date, default: Date.now }
         }

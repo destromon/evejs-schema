@@ -12,17 +12,17 @@
 		{{{block 'field/text' 'email' ../user.email}}}
 	{{/block}}
 
-	{{#block 'form/fieldset' 'Email' errors.email.message}}
-		{{{block 'field/password' 'password' ../user.email}}}
+	{{#block 'form/fieldset' 'Password' errors.password.message}}
+		{{{block 'field/password' 'password' ../user.password}}}
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Birthdate' errors.birthdate.message}}
 		{{{block 'field/date' 'birthdate' ../user.birthdate}}}
 	{{/block}}
 
-	{{#block 'form/fieldset' 'Birthdate' errors.birthdate.message}}
-		{{{block 'field/select' 'gender' 'male|female|null' ../user.birthdate}}}
-	{{/block}}
+	{{#block 'form/fieldset' 'Gender' errors.gender.message}}
+		{{#block 'field/radio' 'gender' ../user.gender}}{{/block}}
+		{{#block 'field/radio' 'gender' ../user.gender}}{{/block}}{{/block}}
 
 	{{#block 'form/fieldset' 'Website' errors.website.message}}
 		{{{block 'field/text' 'website' ../user.website}}}
@@ -63,7 +63,7 @@
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Country' errors.country.message}}
-		{{{block 'field/text' 'address[country]' ../address.country}}}
+		{{{block 'field/country' 'address[country]' ../address.country}}}
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Postal' errors.postal.message}}
@@ -100,7 +100,7 @@
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Country' errors.country.message}}
-		{{{block 'field/text' 'company[country]' ../company.country}}}
+		{{{block 'field/country' 'company[country]' ../company.country}}}
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Postal' errors.postal.message}}
@@ -125,7 +125,7 @@
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Source' errors.source.message}}
-		{{{block 'field/text' 'photo[source]' ../photo.source}}}
+		{{{block 'field/file' 'photo[source]' ../photo.source}}}
 	{{/block}}
 
 	{{#block 'form/fieldset' 'Mime' errors.mime.message}}
