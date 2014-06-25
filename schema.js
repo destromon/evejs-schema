@@ -331,7 +331,7 @@ eden('sequence')
 
         //read template
         subSequence.then(function(subNext) {
-            fs.readFile(paths.dev + paths.template + '/index.html', 'utf-8', function(err, data){
+            fs.readFile(paths.dev + '/package/control/template/index.html', 'utf-8', function(err, data){
                 var indexTemplate = data;
                 indexTemplate     =  eden('string').replace(indexTemplate, 'temp', file);
                 subNext(file, indexTemplate);

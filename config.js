@@ -4,5 +4,4 @@ module.exports = {
 	server	: '/server/public/eve/server/current',
 	control	: '/server/public/eve/control/current',
 	web		: '/server/public/eve/web/current',
-    schema  : '/build/schema',
-    template: '/build/server/schema/template'};
+    schema  : '/build/schema'};
