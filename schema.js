@@ -1,8 +1,8 @@
-//get schema if theres any
-var schemaFiles = process.argv.slice(2);
-
 //require denpendancies
 var eden = require('./build/server/node_modules/edenjs/lib/index');
+
+//get schema if theres any
+var schemaFiles = eden('array').slice(process.argv, 2);
 
 var paths = require('./config');
 var data  = {};
@@ -21,11 +21,11 @@ eden('sequence')
 
 //Loop through schema folder
 .then(function(next) {
-    console.log('Getting All Schema...', schemaFiles);
+    console.log('Getting Schema...');
     var dir='./schema/';
     
     //if user specify a schema
-    if(schemaFiles.length >= 1) {
+    if(eden('string').size(schemaFiles.toString()) >= 1) {
         var c = 0;
         schemaFiles.forEach(function(file) {
             c++;
@@ -66,56 +66,64 @@ eden('sequence')
 
 //loop through schema and get properties
 .then(function(next) {
-    var template = [];
+    var template     = [],
+    startBlock       = "{{#block 'form/fieldset' ",
+    endStartBlock    = '}}',
+    endBlock         = '}}',
+    newLine          = '\n',
+    tab              = '\t',
+    innerBlock       = '{{{block ',
+    innerCloserBlock = '}}}',
+    closerBlock      = '{{/block}}';
 
     var _readKeys = function(content, schema) {
         for(var key in content) {
-            var field    = '';
-            var type     = '';
-            var required = '';
-            var data     = '';
+            var data = '',
+            field    = '',
+            required = '',
+            type     = '';
 
             //check if there's field property
             if(content[key].field !== undefined) {
-                type = content[key].field;
+                type  = content[key].field;
                 field = key;
-                //console.log(key, 'type ->', type);
 
             //check if its select
             } else if(content[key].hasOwnProperty('enum')) {
                 field = key;
                 type  = 'select';
+                //get items
                 for(var select in content[key].enum) {
-                   data += content[key].enum[select] +'|';
+                   data += content[key].enum[select] + '|';
                 }
             } else if(content[key].hasOwnProperty('data')) {
+                //its a collection, recurse
                 _readKeys(content[key].data, schema);
             } else {
-                //get field according to type property
+                //get field according to 'type' property
                 if(content[key].hasOwnProperty('type')) {
-                    field = content[key].type.toString().toLowerCase();
+                    field = content[key].type.toString();
+                    field = eden('string').toLowerCase(field);
                 } else {
-                    //otherwise, its a collection
+                    //if its not a key
                     if(key != 0) {
+                        //its a collection, recurse
                         _readKeys(content[key], key);    
                     }
-                    //console.log(content[key]);
                 }
-                
+
+                //get type of input
                 //if its string then its text
-                if (field.indexOf('string') !== -1 ) {
+                if (eden('string').indexOf(field, 'string') !== -1 ) {
                     type = 'text';
-                    //console.log(key, ' field is ', type);
 
                 //if its boolean then its radio
-                } else if(field.indexOf('boolean') !== -1) {
+                } else if(eden('string').indexOf(field, 'boolean') !== -1) {
                     type = 'radio';
-                    //console.log(key, ' field is ', type);
 
                 //if its date then its datetime
-                } else if(field.indexOf('date') !== -1) {
+                } else if(eden('string').indexOf(field, 'date') !== -1) {
                     type = 'datetime';
-                    //console.log(key, ' field is ', type);
                 }
 
                 //get the name of the field
@@ -140,7 +148,7 @@ eden('sequence')
 
 
             //uppercase first letter of title
-            var title = field.charAt(0).toUpperCase() + field.substring(1,field.length);
+            var title = eden('string').ucFirst(field);
 
             //check field type and assign it to template
             switch(type) {
@@ -153,17 +161,29 @@ eden('sequence')
 
                 //for select
                 case 'select':
-                    data = data.toString().substring(0, data.toString().length-1);
+                    data = eden('string').substr(data, 0, eden('string').size(data)-1);
                     template += '{{#block ' +'\'form/fieldset\' \''+title + required + '\' errors.'+field+'.message}}' +
                     '\n\t{{{block '+ '\'field/'+type +'\' \'' +field+ '\' \''+ data +'\' '+ schema+'.'+field +'}}}' + '\n{{/block}}\n\n';
                     break;
 
                 //default template
                 default:
-                    //check if it has type before assigning the template
+                    //check if it has type before assigning it to templatenotp
                     if(content[key].hasOwnProperty('type')) {
-                        template += '{{#block ' +'\'form/fieldset\' \''+title + required + '\' errors.'+field+'.message}}' +
-                        '\n\t{{{block '+ '\'field/'+type +'\' \'' +field+'\' ../'+ schema+'.'+field +'}}}' + '\n{{/block}}\n\n';
+                        template += newLine
+                                 +  startBlock 
+                                 +  '\'' + title + required + '\' '
+                                 +  'errors.' + field + '.message' 
+                                 +  endStartBlock
+                                 +  newLine + tab
+                                 +  innerBlock
+                                 +  '\'field/' + type +'\' '
+                                 +  '\'' + field + '\' '
+                                 +  '../'+ schema + '.' + field
+                                 +  innerCloserBlock
+                                 +  newLine
+                                 +  closerBlock
+                                 +  newLine;
                         break;
                     }
             }
@@ -179,23 +199,27 @@ eden('sequence')
             }
         });
     }
+
     //loop through schema folder
     for(var schema in data)  {
         //require schema
         var content = require('./schema/' + schema);
 
         //reset template
-        template = [];
+        template = '<form method="post" class="form-horizontal">\n';
 
         //get file name        
-        var file = schema.toString().substring(0,schema.toString().length-3);
-        eden('folder', paths.dev + '/' + paths.schema + '/' + file)
-        .mkdir(0777, function(err) {});
+        var file = schema.toString();
+        file     = eden('string').substring(file, 0, eden('string').size(file)-3);
+        eden('folder', paths.dev + '/' + paths.schema + '/' + file).mkdir(0777, function(err) {});
+        
         //traverse through property
         _readKeys(content, file);
         
-        //create template'
-        schema = schema.replace('.js', '.html');
+        schema   = eden('string').replace(schema, '.js', '.html');
+        template += '\n</form>';
+
+        //create html template
         createTemplate(file, template);
     }
 })

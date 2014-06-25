@@ -16,7 +16,7 @@ revision: [{
     status      : { type: String, enum: ['draft', 'review', 'published', 'other'] },
     visibility  : { type: String, enum: ['public', 'private'] },
     active      : { type: Boolean, default: true },
-    published   : { type: String, default: Date.now },
+    published   : { type: Date, default: Date.now },
     created     : { type: Date, default: Date.now },
     updated     : { type: Date, default: Date.now },
 
