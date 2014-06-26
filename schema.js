@@ -7,9 +7,6 @@ var schemaFiles = eden('array').slice(process.argv, 2);
 var paths    = require('./config'),
 fs           = require('fs'),
 data         = {},
-serverEvent  = {},
-serverAction = {},
-controlAction= {},
 fileCount    = 0;
 
 eden('sequence')
@@ -17,6 +14,7 @@ eden('sequence')
 //Create schema folder
 .then(function(next) {
     console.log('Creating Schema Folder..');
+
     eden('folder', paths.dev + '/' + paths.schema)
     .mkdir(0777, function() {
         next();
@@ -27,7 +25,7 @@ eden('sequence')
 .then(function(next) {
     console.log('Getting Schema...');
     var dir='./schema/';
-    
+
     //if user specify a schema
     if(eden('string').size(schemaFiles.toString()) >= 1) {
         var c = 0;
@@ -69,75 +67,6 @@ eden('sequence')
             });        
         });    
     }
-})
-
-//get control action
-.then(function(next) {
-    console.log('getting server action...');
-    var dir = './template/control/action/';
-    fs.readdir(dir, function(err,files) {
-        if (err) throw err;
-        var c=0;
-        files.forEach(function(file){
-            c++;
-            fs.readFile(dir+file,'utf-8',function(err, schema) {
-                if (err) {
-                    console.log('invalid file');
-                    return;
-                }
-                controlAction[file]=schema;
-                if (0===--c) {
-                    next();
-                }            
-            });
-        });        
-    });
-})
-
-//get server event
-.then(function(next) {
-    console.log('getting server events...');
-    var dir = './template/server/event/';
-    fs.readdir(dir, function(err,files) {
-        if (err) throw err;
-        var c=0;
-        files.forEach(function(file){
-            c++;
-            fs.readFile(dir+file,'utf-8',function(err, schema) {
-                if (err) {
-                    console.log('invalid file');
-                    return;
-                }
-                serverEvent[file]=schema;
-                if (0===--c) {
-                    next();
-                }            
-            });
-        });        
-    });
-})
-
-//get server action
-.then(function(next) {
-    console.log('getting server action...');
-    var dir = './template/server/action/';
-    fs.readdir(dir, function(err,files) {
-        if (err) throw err;
-        var c=0;
-        files.forEach(function(file){
-            c++;
-            fs.readFile(dir+file,'utf-8',function(err, schema) {
-                if (err) {
-                    console.log('invalid file');
-                    return;
-                }
-                serverAction[file]=schema;
-                if (0===--c) {
-                    next();
-                }            
-            });
-        });        
-    });
 })
 
 //loop through schema file and get properties
@@ -398,83 +327,51 @@ eden('sequence')
         });
     }
 
-    //create template based on arguments
-    var createTemplate = function(file, folder, source, schema) {
-        //if its root
-        if(folder === '/server/' || folder === '/control/' || folder === '/control/template/') {
-            //if its schema
-            if(source === 'store.js') {
-                //read and replace data base on schema
-                subSequence.then(function(subNext) {
-                    fs.readFile(paths.dev + '/template' + folder + source, 'utf-8', function(err, dataFile){
-                        var currentSchema = eden('string').replace(data[schema], 'module.exports = ', ''),
-                        currentTemplate   = eden('string').replace(dataFile, 'temp', currentSchema);
-                        subNext(file, currentTemplate);
-                    });
-                })
-                
-            } else {                
-                //read and replace data base on file
-                subSequence.then(function(subNext) {
-                    
-                    fs.readFile(paths.dev + '/template' + folder + source, 'utf-8', function(err, data){
-                        var currentTemplate = eden('string').replace(data, 'temp', file);
-                        subNext(file, currentTemplate);
-                    });
+    var createTemplate = function(file, folder, destination, sourceFile, schema) {
+        if(sourceFile === 'store.js') {
+            //read and replace data base on schema
+            subSequence.then(function(subNext) {
+                fs.readFile(paths.dev + folder +  sourceFile, 'utf-8', function(err, dataFile){
+                    var currentSchema = eden('string').replace(data[schema], 'module.exports = ', ''),
+                    currentTemplate   = eden('string').replace(dataFile, 'temp', currentSchema);
+                    subNext(file, currentTemplate);
                 });
-            }
-            
-            //write file
-            subSequence.then(function(file, currentTemplate, subNext) {
-                fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + folder + source , currentTemplate, function(err) {
+            })
+        } else {
+            //read and replace data base on file
+            subSequence.then(function(subNext) {
+                fs.readFile(paths.dev + folder +  sourceFile, 'utf-8', function(err, data){
+                    var currentTemplate = eden('string').replace(data, 'temp', file);
+                    subNext(file, currentTemplate);
+                });
+            });
+        }
+           
+        //write file
+        subSequence.then(function(file, currentTemplate, subNext) {
+            //if destination is event folder, filename is file-sourceFile
+            if (destination === '/server/event/') {
+                fs.writeFile(paths.dev + paths.schema + '/' + file + destination + file +'-' + sourceFile , currentTemplate, function(err) {
                     if (err) {
-                        console.log('failed to create', source, file);
+                        console.log('failed to create event template for', file);
                     } else {
-                        console.log(file, source, 'has been created.');
+                        console.log(file + destination + sourceFile, 'has been created on');
                         subNext();
                     }        
                 });
-            });
-            
-        //its a folder, loop through its content
-        } else {
-            for(var templates in source){
-                (function() {
-                    var currentFile = templates;
-                    
-                    //read and replace data base on file
-                    subSequence.then(function(subNext) {
-                        fs.readFile(paths.dev + '/template' + folder + currentFile, 'utf-8', function(err, data){
-                            var currentTemplate = eden('string').replace(data, 'temp', file);
-                            subNext(file, currentTemplate);
-                        });
-                    })
-                    
-                    //write file
-                    .then(function(file, currentTemplate, subNext) {
-                        if (folder === '/server/action/' || folder === '/control/action/') {
-                            fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + folder + currentFile , currentTemplate, function(err) {
-                                if (err) {
-                                    console.log('failed to create event template for', file);
-                                } else {
-                                    console.log(file, currentFile, 'action has been created.');
-                                    subNext();
-                                }        
-                            });
-                        }else{
-                            fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + folder + file +'-' + currentFile , currentTemplate, function(err) {
-                                if (err) {
-                                    console.log('failed to create event template for', file);
-                                } else {
-                                    console.log(file, currentFile, 'event has been created.');
-                                    subNext();
-                                }        
-                            });
-                        }
-                    });
-                })(templates);
+
+            //filename is file
+            } else {
+                fs.writeFile(paths.dev + paths.schema + '/' + file + destination + sourceFile , currentTemplate, function(err) {
+                    if (err) {
+                        console.log('failed to create event template for', file);
+                    } else {
+                        console.log(file + destination + sourceFile, 'has been created');
+                        subNext();
+                    }          
+                });
             }
-        }
+        });
     };
 
     //loop through schema folder
@@ -555,35 +452,104 @@ eden('sequence')
             .then(function(file, content, subNext) {
                 _readKeys(content, file);
                 createFormTemplate(file, template);
-                
-                console.log('Creating Index Template for', file);
-                createTemplate(file, '/control/template/', 'index.html');
 
-                console.log('Creating Control Action for', file);
-                createTemplate(file, '/control/action/', controlAction);
-                
                 subNext(file);
+            })
 
-            //create server template
-            }).then(function(file, subNext) {
+            //get file in control/template and create a template
+            .then(function(file, subNext) {
+                console.log('Creating Control Action for', file);
+                var dir = './template/control/template/';
+                var template = {};
+                eden('folder', dir).getFiles(null, false, function(files){
+                    var template = files;
+                    for (var page in template) {
+                        var path = template[page].path;
+                        var thisFile = eden('string').substring(path, 
+                            eden('string').lastIndexOf(path, '/')+1, 
+                            eden('string').size(path));
+                        
+                        createTemplate(file, eden('string').substr(dir,1, eden('string').size(dir)) , '/control/template/', thisFile);
+                    }
+                    subNext(file);
+                });
+            })
+
+            //get file in control/action and create a template
+            .then(function(file, subNext) {
+                console.log('Creating Control Action for', file);
+                var dir = './template/control/action/';
+                var action = {};
+                eden('folder', dir).getFiles(null, false, function(files){
+                    var action = files;
+                    for (var page in action) {
+                        var path = action[page].path;
+                        var thisFile = eden('string').substring(path, 
+                            eden('string').lastIndexOf(path, '/')+1, 
+                            eden('string').size(path));
+                        
+                        createTemplate(file, eden('string').substr(dir,1, eden('string').size(dir)) , '/control/action/', thisFile);
+                    }
+                    subNext(file);
+                });
+            })
+
+            //get file in server/event and create a template
+            .then(function(file, subNext) {
                 console.log('Creating Server Event for', file);
-                createTemplate(file, '/server/event/', serverEvent);
-                
+
+                var dir = './template/server/event/';
+                var events = {};
+                eden('folder', dir).getFiles(null, false, function(files){
+                    events = files;
+                    for (var page in events) {
+                        var path = events[page].path;
+                        var thisFile = eden('string').substring(path, 
+                            eden('string').lastIndexOf(path, '/')+1, 
+                            eden('string').size(path));
+                        
+                        createTemplate(file, eden('string').substr(dir,1, eden('string').size(dir)) , '/server/event/', thisFile);
+                    }
+                    subNext(file);
+                });
+            })
+
+            //get file in server/action and create a template
+            .then(function(file, subNext) {
                 console.log('Creating Server Action for', file);
-                createTemplate(file, '/server/action/', serverAction);
-                
-                console.log('Creating Server Index for', file);
-                createTemplate(file, '/server/', 'index.js');
 
-                console.log('Creating Server store.js for', file);
-                createTemplate(file, '/server/', 'store.js', schema);
+                var dir = './template/server/action/';
+                var action = {};
+                eden('folder', dir).getFiles(null, false, function(files){
+                    action = files;
+                    for (var page in action) {
+                        var path = action[page].path;
+                        var thisFile = eden('string').substring(path, 
+                            eden('string').lastIndexOf(path, '/')+1, 
+                            eden('string').size(path));
+                        createTemplate(file, eden('string').substr(dir,1, eden('string').size(dir)) , '/server/action/', thisFile);
+                    }
+                });
+                subNext(file);
+            })
 
-                console.log('Creating Server Factory for', file);
-                createTemplate(file, '/server/', 'factory.js');
-                
+            // for server/ index, store and factory;
+            .then(function(file, subNext) {
+                var dir = './template/server/';
+                var server = {};
+                eden('folder', dir).getFiles(null, false, function(files){
+                    server = files;
+                    for (var page in server) {
+                        var path = server[page].path;
+                        var thisFile = eden('string').substring(path, 
+                            eden('string').lastIndexOf(path, '/')+1, 
+                            eden('string').size(path));
+                        createTemplate(file, eden('string').substr(dir,1, eden('string').size(dir)) , '/server/', thisFile, schema);
+                    }
+                });
+
                 subNext();
             });
-
         })(schemas);
     }
 }); 
