@@ -1,0 +1,163 @@
+<form method="post" class="form-horizontal">
+
+	{{#block 'form/fieldset' 'Name <span>*</span>' errors.name.message}}
+		{{{block 'field/text' 'name' ../user.name}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Slug <span>*</span>' errors.slug.message}}
+		{{{block 'field/text' 'slug' ../user.slug}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Email <span>*</span>' errors.email.message}}
+		{{{block 'field/text' 'email' ../user.email}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Password' errors.password.message}}
+		{{{block 'field/password' 'password' ../user.password}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Birthdate' errors.birthdate.message}}
+		{{{block 'field/date' 'birthdate' ../user.birthdate}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Gender' errors.gender.message}}
+		{{#block 'field/radio' 'gender' ../user.gender}}Male{{/block}}
+		{{#block 'field/radio' 'gender' ../user.gender}}Female{{/block}}
+		{{#block 'field/radio' 'gender' ../user.gender}}Null{{/block}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Website' errors.website.message}}
+		{{{block 'field/text' 'website' ../user.website}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Phone' errors.phone.message}}
+		{{{block 'field/text' 'phone' ../user.phone}}}
+	{{/block}}
+
+<hr />
+{{#block 'form/fieldset' 'Start: Template for Address' }}{{/block}}
+	{{#block 'form/fieldset' 'Label' errors.label.message}}
+		{{{block 'field/text' 'address[label]' ../address.label}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Contact' errors.contact.message}}
+		{{{block 'field/text' 'address[contact]' ../address.contact}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Street' errors.street.message}}
+		{{{block 'field/text' 'address[street]' ../address.street}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Neighborhood' errors.neighborhood.message}}
+		{{{block 'field/text' 'address[neighborhood]' ../address.neighborhood}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'City' errors.city.message}}
+		{{{block 'field/text' 'address[city]' ../address.city}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'State' errors.state.message}}
+		{{{block 'field/text' 'address[state]' ../address.state}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Region' errors.region.message}}
+		{{{block 'field/text' 'address[region]' ../address.region}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Country' errors.country.message}}
+		{{{block 'field/country' 'address[country]' ../address.country}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Postal' errors.postal.message}}
+		{{{block 'field/text' 'address[postal]' ../address.postal}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Phone' errors.phone.message}}
+		{{{block 'field/text' 'address[phone]' ../address.phone}}}
+	{{/block}}
+
+{{#block 'form/fieldset' 'End: Template for Address' }}{{/block}}
+<hr/ >
+
+<hr />
+{{#block 'form/fieldset' 'Start: Template for Company' }}{{/block}}
+	{{#block 'form/fieldset' 'Name' errors.name.message}}
+		{{{block 'field/text' 'company[name]' ../company.name}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Title' errors.title.message}}
+		{{{block 'field/text' 'company[title]' ../company.title}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Street' errors.street.message}}
+		{{{block 'field/text' 'company[street]' ../company.street}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'City' errors.city.message}}
+		{{{block 'field/text' 'company[city]' ../company.city}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'State' errors.state.message}}
+		{{{block 'field/text' 'company[state]' ../company.state}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Country' errors.country.message}}
+		{{{block 'field/country' 'company[country]' ../company.country}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Postal' errors.postal.message}}
+		{{{block 'field/text' 'company[postal]' ../company.postal}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Phone' errors.phone.message}}
+		{{{block 'field/text' 'company[phone]' ../company.phone}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Email' errors.email.message}}
+		{{{block 'field/text' 'company[email]' ../company.email}}}
+	{{/block}}
+
+{{#block 'form/fieldset' 'End: Template for Company' }}{{/block}}
+<hr/ >
+
+<hr />
+{{#block 'form/fieldset' 'Start: Template for Photo' }}{{/block}}
+	{{#block 'form/fieldset' 'Name' errors.name.message}}
+		{{{block 'field/text' 'photo[name]' ../photo.name}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Source' errors.source.message}}
+		{{{block 'field/file' 'photo[source]' ../photo.source}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Mime' errors.mime.message}}
+		{{{block 'field/text' 'photo[mime]' ../photo.mime}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Date' errors.date.message}}
+		{{{block 'field/date' 'photo[date]' ../photo.date}}}
+	{{/block}}
+
+{{#block 'form/fieldset' 'End: Template for Photo' }}{{/block}}
+<hr/ >
+
+	{{#block 'form/fieldset' 'Facebook' errors.facebook.message}}
+		{{{block 'field/text' 'facebook' ../user.facebook}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Twitter' errors.twitter.message}}
+		{{{block 'field/text' 'twitter' ../user.twitter}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Google' errors.google.message}}
+		{{{block 'field/text' 'google' ../user.google}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Linkedin' errors.linkedin.message}}
+		{{{block 'field/text' 'linkedin' ../user.linkedin}}}
+	{{/block}}
+
+	{{#block 'form/fieldset' 'Active' errors.active.message}}
+		{{#block 'field/radio' 'active' ../user.active}}True{{/block}}
+		{{#block 'field/radio' 'active' ../user.active}}False{{/block}}
+	{{/block}}

@@ -6,9 +6,7 @@ var schemaFiles = eden('array').slice(process.argv, 2);
 
 //require modules
 var paths    = require('./config'),
-fs           = require('fs'),
-data         = {},
-fileCount    = 0;
+fs           = require('fs');
 
 //start sequence
 eden('sequence')
@@ -26,7 +24,9 @@ eden('sequence')
 //Loop through schema folder in root directory
 .then(function(next) {
     console.log('Getting Schema...');
-    var dir='./schema/';
+    var dir      ='./schema/',
+    schemaFolder = {},
+    fileCount    = 0;
 
     //if user specify a schema
     if(eden('string').size(schemaFiles.toString()) >= 1) {
@@ -40,9 +40,9 @@ eden('sequence')
                     return;
                 }
 
-                data[file]=schema;
+                schemaFolder[file]=schema;
                 if (0===--c) {
-                    next();
+                    next(schemaFolder, fileCount);
                 }            
             });
         });
@@ -61,9 +61,9 @@ eden('sequence')
                         return;
                     }
 
-                    data[file]=schema;
+                    schemaFolder[file]=schema;
                     if (0===--c) {
-                        next();
+                        next(schemaFolder, fileCount);
                     }            
                 });
             });        
@@ -72,7 +72,7 @@ eden('sequence')
 })
 
 //loop through each schema file and get its properties
-.then(function(next) {
+.then(function(schemaFolder, fileCount, next) {
     var subSequence = eden('sequence');
 
     //form handlebars template
@@ -347,7 +347,7 @@ eden('sequence')
         if(sourceFile === 'store.js') {
             subSequence.then(function(subNext) {
                 fs.readFile(paths.dev + folder +  sourceFile, 'utf-8', function(err, dataFile){
-                    var currentSchema = eden('string').replace(data[schema], 'module.exports = ', ''),
+                    var currentSchema = eden('string').replace(schemaFolder[schema], 'module.exports = ', ''),
                     currentTemplate   = eden('string').replace(dataFile, 'temporary', currentSchema);
                     subNext(file, currentTemplate);
                 });
@@ -406,7 +406,7 @@ eden('sequence')
     };
 
     //loop through schema folder
-    for(var schemas in data)  {
+    for(var schemas in schemaFolder)  {
         (function(){ 
             var schema = schemas;
             
