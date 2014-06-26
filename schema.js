@@ -118,6 +118,8 @@ eden('sequence')
 
 //loop through schema file and get properties
 .then(function(next) {
+    var subSequence = eden('sequence');
+
     //create form template
     var template     = [],
     startBlock       = "{{#block 'form/fieldset' ",
@@ -358,8 +360,6 @@ eden('sequence')
         }
     };
 
-    var subSequence = eden('sequence');
-
     var createTemplate = function(file, template) {
         fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + '/control/template/' + 'form.html', template, function(err) {
             fileCount--;
@@ -380,11 +380,11 @@ eden('sequence')
         //read template
         subSequence.then(function(subNext) {
             fs.readFile(paths.dev + '/template/control/template/index.html', 'utf-8', function(err, data){
-                var indexTemplate = data;
-                indexTemplate     =  eden('string').replace(indexTemplate, 'temp', file);
+                var indexTemplate =  eden('string').replace(data, 'temp', file);
                 subNext(file, indexTemplate);
             });
         })
+
         //create index template
         .then(function(file, indexTemplate, subNext) {
             fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + '/control/template/' + 'index.html', indexTemplate, function(err) {
@@ -398,42 +398,81 @@ eden('sequence')
         });
     };
 
-    //server events
-    var createServerTemplate = function(file, folder, data) {
-        for(var events in data){
-            (function() {
-                var currentFile = events;
-                //read and replace data
+    //server template
+    var createServerTemplate = function(file, folder, source, schema) {
+        //if its root
+        if(folder === '/server/') {
+            //if its schema
+            if(source === 'store.js') {
+                //read and replace data base on schema
                 subSequence.then(function(subNext) {
-                    fs.readFile(paths.dev + '/template/server/'+ folder + currentFile, 'utf-8', function(err, data){
-                        var currentTemplate = data;
-                        currentTemplate     = eden('string').replace(currentTemplate, 'temp', file);
+                    fs.readFile(paths.dev + '/template' + folder + source, 'utf-8', function(err, dataFile){
+                        var currentSchema = eden('string').replace(data[schema], 'module.exports = ', ''),
+                        currentTemplate   = eden('string').replace(dataFile, 'temp', currentSchema);
                         subNext(file, currentTemplate);
                     });
                 })
-                //write file
-                .then(function(file, currentTemplate, subNext) {
-                    if (folder === 'action/') {
-                        fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + '/server/'+ folder + currentFile , currentTemplate, function(err) {
-                            if (err) {
-                                console.log('failed to create event template for', file);
-                            } else {
-                                console.log(file, currentFile, 'action has been created.');
-                                subNext();
-                            }        
-                        });
-                    }else{
-                        fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + '/server/'+ folder + file +'-' + currentFile , currentTemplate, function(err) {
-                            if (err) {
-                                console.log('failed to create event template for', file);
-                            } else {
-                                console.log(file, currentFile, 'event has been created.');
-                                subNext();
-                            }        
-                        });
-                    }
+                
+            } else {
+                //read and replace data base on file
+                subSequence.then(function(subNext) {
+                    fs.readFile(paths.dev + '/template' + folder + source, 'utf-8', function(err, data){
+                        var currentTemplate = eden('string').replace(data, 'temp', file);
+                        subNext(file, currentTemplate);
+                    });
                 });
-            })(events);
+            }
+            
+            //write file
+            subSequence.then(function(file, currentTemplate, subNext) {
+                fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + folder + source , currentTemplate, function(err) {
+                    if (err) {
+                        console.log('failed to create', source, file);
+                    } else {
+                        console.log(file, source, 'has been created.');
+                        subNext();
+                    }        
+                });
+            });
+            
+        //its a folder, loop through its content
+        } else {
+            for(var templates in source){
+                (function() {
+                    var currentFile = templates;
+                    
+                    //read and replace data base on file
+                    subSequence.then(function(subNext) {
+                        fs.readFile(paths.dev + '/template' + folder + currentFile, 'utf-8', function(err, data){
+                            var currentTemplate = eden('string').replace(data, 'temp', file);
+                            subNext(file, currentTemplate);
+                        });
+                    })
+                    
+                    //write file
+                    .then(function(file, currentTemplate, subNext) {
+                        if (folder === '/server/action/') {
+                            fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + folder + currentFile , currentTemplate, function(err) {
+                                if (err) {
+                                    console.log('failed to create event template for', file);
+                                } else {
+                                    console.log(file, currentFile, 'action has been created.');
+                                    subNext();
+                                }        
+                            });
+                        }else{
+                            fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + folder + file +'-' + currentFile , currentTemplate, function(err) {
+                                if (err) {
+                                    console.log('failed to create event template for', file);
+                                } else {
+                                    console.log(file, currentFile, 'event has been created.');
+                                    subNext();
+                                }        
+                            });
+                        }
+                    });
+                })(templates);
+            }
         }
     };
 
@@ -442,6 +481,7 @@ eden('sequence')
         (function(){ 
             var schema = schemas;
             subSequence.then(function(subNext) {
+            
             //get file name        
             var file = schema.toString();
             file     = eden('string').substring(file, 0, eden('string').size(file)-3),
@@ -461,7 +501,7 @@ eden('sequence')
                 });
             })
 
-            //create control action
+            //create control/action
             .then(function(file, content, subNext) {
                 eden('folder', paths.dev + '/' + paths.schema + '/' + file + '/control/action')
                 .mkdir(0777, function(err) {
@@ -469,7 +509,7 @@ eden('sequence')
                 });
             })
 
-            //create control template
+            //create control/template
             .then(function(file, content, subNext) {
                 eden('folder', paths.dev + '/' + paths.schema + '/' + file + '/control/template')
                 .mkdir(0777, function(err) {
@@ -477,7 +517,7 @@ eden('sequence')
                 });
             })
 
-            //create control folder
+            //create control/folder
             .then(function(file, content, subNext) {
                 eden('folder', paths.dev + '/' + paths.schema + '/' + file + '/control')
                 .mkdir(0777, function(err) {
@@ -485,7 +525,7 @@ eden('sequence')
                 });
             })
 
-            //create server folder
+            //create server/folder
             .then(function(file, content, subNext) {
                 console.log('Creating Server folder for', file, 'package');
                 eden('folder', paths.dev + '/' + paths.schema + '/' + file + '/server')
@@ -494,7 +534,7 @@ eden('sequence')
                 });
             })
 
-            //create server event
+            //create server/event
             .then(function(file, content, subNext) {
                 eden('folder', paths.dev + '/' + paths.schema + '/' + file + '/server/event')
                 .mkdir(0777, function(err) {
@@ -502,7 +542,7 @@ eden('sequence')
                 });
             })
 
-            //create server action
+            //create server/action
             .then(function(file, content, subNext) {
                 eden('folder', paths.dev + '/' + paths.schema + '/' + file + '/server/action')
                 .mkdir(0777, function(err) {
@@ -510,7 +550,7 @@ eden('sequence')
                 });
             })
 
-            //read properties and create control template
+            //read properties of schema and create a control template
             .then(function(file, content, subNext) {
                 _readKeys(content, file);
                 createTemplate(file, template);
@@ -520,9 +560,20 @@ eden('sequence')
             //create server template
             }).then(function(file, subNext) {
                 console.log('Creating Server Event for', file);
-                createServerTemplate(file, 'event/', serverEvent);
-                 console.log('Creating Server Action for', file);
-                createServerTemplate(file, 'action/', serverAction);
+                createServerTemplate(file, '/server/event/', serverEvent);
+                
+                console.log('Creating Server Action for', file);
+                createServerTemplate(file, '/server/action/', serverAction);
+                
+                console.log('Creating Server Index for', file);
+                createServerTemplate(file, '/server/', 'index.js');
+
+                console.log('Creating Server store.js for', file);
+                createServerTemplate(file, '/server/', 'store.js', schema);
+
+                console.log('Creating Server Factory for', file);
+                createServerTemplate(file, '/server/', 'factory.js');
+                
                 subNext();
             });
 
