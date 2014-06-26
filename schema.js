@@ -4,10 +4,12 @@ var eden      = require('./build/server/node_modules/edenjs/lib/index');
 //get schema if theres any
 var schemaFiles = eden('array').slice(process.argv, 2);
 
-var paths = require('./config'),
-fs        = require('fs'),
-data      = {},
-fileCount = 0;
+var paths   = require('./config'),
+fs          = require('fs'),
+data        = {},
+serverEvent = {},
+serverAction= {},
+fileCount   = 0;
 
 eden('sequence')
 
@@ -28,7 +30,7 @@ eden('sequence')
     //if user specify a schema
     if(eden('string').size(schemaFiles.toString()) >= 1) {
         var c = 0;
-        schemaFiles.forEach(function(file) {
+        schemaFiles.forEach(function(file) {            
             c++;
             fs.readFile(dir+file,'utf-8',function(err, schema) {
                 fileCount++;
@@ -66,6 +68,52 @@ eden('sequence')
             });        
         });    
     }
+})
+
+//get server event
+.then(function(next) {
+    console.log('getting server events...');
+    var dir = './template/server/event/';
+    fs.readdir(dir, function(err,files) {
+        if (err) throw err;
+        var c=0;
+        files.forEach(function(file){
+            c++;
+            fs.readFile(dir+file,'utf-8',function(err, schema) {
+                if (err) {
+                    console.log('invalid file');
+                    return;
+                }
+                serverEvent[file]=schema;
+                if (0===--c) {
+                    next();
+                }            
+            });
+        });        
+    });
+})
+
+//get server action
+.then(function(next) {
+    console.log('getting server action...');
+    var dir = './template/server/action/';
+    fs.readdir(dir, function(err,files) {
+        if (err) throw err;
+        var c=0;
+        files.forEach(function(file){
+            c++;
+            fs.readFile(dir+file,'utf-8',function(err, schema) {
+                if (err) {
+                    console.log('invalid file');
+                    return;
+                }
+                serverAction[file]=schema;
+                if (0===--c) {
+                    next();
+                }            
+            });
+        });        
+    });
 })
 
 //loop through schema file and get properties
@@ -313,7 +361,7 @@ eden('sequence')
     var subSequence = eden('sequence');
 
     var createTemplate = function(file, template) {
-        fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + '/control' + '/' +'form.html', template, function(err) {
+        fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + '/control/template/' + 'form.html', template, function(err) {
             fileCount--;
             if (err) {
                 console.log('failed to create',file, 'template');
@@ -339,7 +387,7 @@ eden('sequence')
         })
         //create index template
         .then(function(file, indexTemplate, subNext) {
-            fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + '/control/' + 'index.html', indexTemplate, function(err) {
+            fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + '/control/template/' + 'index.html', indexTemplate, function(err) {
                 if (err) {
                     console.log('failed to create',file, 'template');
                 } else {
@@ -350,8 +398,44 @@ eden('sequence')
         });
     };
 
-    var createServerEvent = function(file) {
+    //server events
+    var createServerTemplate = function(file, folder, data) {
         console.log('Creating Server Event for', file);
+        for(var events in data){
+            (function() {
+                var currentFile = events;
+                //read and replace data
+                subSequence.then(function(subNext) {
+                    fs.readFile(paths.dev + '/template/server/'+ folder + currentFile, 'utf-8', function(err, data){
+                        var currentTemplate = data;
+                        currentTemplate     = eden('string').replace(currentTemplate, 'temp', file);
+                        subNext(file, currentTemplate);
+                    });
+                })
+                //write file
+                .then(function(file, currentTemplate, subNext) {
+                    if (folder === 'action/') {
+                        fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + '/server/'+ folder + currentFile , currentTemplate, function(err) {
+                            if (err) {
+                                console.log('failed to create event template for', file);
+                            } else {
+                                console.log(file, currentFile, 'event has been created.');
+                                subNext();
+                            }        
+                        });
+                    }else{
+                        fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + '/server/'+ folder + file +'-' + currentFile , currentTemplate, function(err) {
+                            if (err) {
+                                console.log('failed to create event template for', file);
+                            } else {
+                                console.log(file, currentFile, 'event has been created.');
+                                subNext();
+                            }        
+                        });
+                    }
+                });
+            })(events);
+        }
     };
 
     //loop through schema folder
@@ -378,10 +462,55 @@ eden('sequence')
                 });
             })
 
+            //create control action
+            .then(function(file, content, subNext) {
+                console.log('Creating Control folder for', file, 'package');
+                eden('folder', paths.dev + '/' + paths.schema + '/' + file + '/control/action')
+                .mkdir(0777, function(err) {
+                    subNext(file, content);
+                });
+            })
+
+            //create control action
+            .then(function(file, content, subNext) {
+                console.log('Creating Control folder for', file, 'package');
+                eden('folder', paths.dev + '/' + paths.schema + '/' + file + '/control/template')
+                .mkdir(0777, function(err) {
+                    subNext(file, content);
+                });
+            })
+
+            //create control folder
+            .then(function(file, content, subNext) {
+                console.log('Creating Control folder for', file, 'package');
+                eden('folder', paths.dev + '/' + paths.schema + '/' + file + '/control')
+                .mkdir(0777, function(err) {
+                    subNext(file, content);
+                });
+            })
+
             //create server folder
             .then(function(file, content, subNext) {
                 console.log('Creating Server folder for', file, 'package');
                 eden('folder', paths.dev + '/' + paths.schema + '/' + file + '/server')
+                .mkdir(0777, function(err) {
+                    subNext(file, content);
+                });
+            })
+
+            //create server event
+            .then(function(file, content, subNext) {
+                console.log('Creating Server folder for', file, 'package');
+                eden('folder', paths.dev + '/' + paths.schema + '/' + file + '/server/event')
+                .mkdir(0777, function(err) {
+                    subNext(file, content);
+                });
+            })
+
+            //create server action
+            .then(function(file, content, subNext) {
+                console.log('Creating Server folder for', file, 'package');
+                eden('folder', paths.dev + '/' + paths.schema + '/' + file + '/server/action')
                 .mkdir(0777, function(err) {
                     subNext(file, content);
                 });
@@ -396,9 +525,11 @@ eden('sequence')
 
             //create server template
             }).then(function(file, subNext) {
-                createServerEvent(file);
+                createServerTemplate(file, 'event/', serverEvent);
+                createServerTemplate(file, 'action/', serverAction);
                 subNext();
             });
+
         })(schemas);
     }
 }); 
