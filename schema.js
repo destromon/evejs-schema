@@ -360,13 +360,13 @@ eden('sequence')
         }
     };
 
-    var createTemplate = function(file, template) {
+    var createFormTemplate = function(file, template) {
         fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + '/control/template/' + 'form.html', template, function(err) {
             fileCount--;
             if (err) {
                 console.log('failed to create',file, 'template');
             } else {
-                console.log(file, 'Form template has been created.');
+                console.log(file, 'form.html template has been created.');
                 if(fileCount === 0) {
                     next();
                 }
@@ -374,34 +374,34 @@ eden('sequence')
         });
     }
 
-    var createIndexTemplate = function(file) {
-        console.log('Creating Index page for', file);
+    // var createIndexTemplate = function(file) {
+    //     console.log('Creating Index page for', file);
 
-        //read template
-        subSequence.then(function(subNext) {
-            fs.readFile(paths.dev + '/template/control/template/index.html', 'utf-8', function(err, data){
-                var indexTemplate =  eden('string').replace(data, 'temp', file);
-                subNext(file, indexTemplate);
-            });
-        })
+    //     //read template
+    //     subSequence.then(function(subNext) {
+    //         fs.readFile(paths.dev + '/template/control/template/index.html', 'utf-8', function(err, data){
+    //             var indexTemplate =  eden('string').replace(data, 'temp', file);
+    //             subNext(file, indexTemplate);
+    //         });
+    //     })
 
-        //create index template
-        .then(function(file, indexTemplate, subNext) {
-            fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + '/control/template/' + 'index.html', indexTemplate, function(err) {
-                if (err) {
-                    console.log('failed to create',file, 'template');
-                } else {
-                    console.log(file, 'Index template has been created.');
-                    subNext();
-                }          
-            });
-        });
-    };
+    //     //create index template
+    //     .then(function(file, indexTemplate, subNext) {
+    //         fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + '/control/template/' + 'index.html', indexTemplate, function(err) {
+    //             if (err) {
+    //                 console.log('failed to create',file, 'template');
+    //             } else {
+    //                 console.log(file, 'Index template has been created.');
+    //                 subNext();
+    //             }          
+    //         });
+    //     });
+    // };
 
-    //server template
-    var createServerTemplate = function(file, folder, source, schema) {
+    //create template based on arguments
+    var createTemplate = function(file, folder, source, schema) {
         //if its root
-        if(folder === '/server/') {
+        if(folder === '/server/' || folder === '/control/' || folder === '/control/template/') {
             //if its schema
             if(source === 'store.js') {
                 //read and replace data base on schema
@@ -413,9 +413,10 @@ eden('sequence')
                     });
                 })
                 
-            } else {
+            } else {                
                 //read and replace data base on file
                 subSequence.then(function(subNext) {
+                    
                     fs.readFile(paths.dev + '/template' + folder + source, 'utf-8', function(err, data){
                         var currentTemplate = eden('string').replace(data, 'temp', file);
                         subNext(file, currentTemplate);
@@ -480,16 +481,16 @@ eden('sequence')
     for(var schemas in data)  {
         (function(){ 
             var schema = schemas;
-            subSequence.then(function(subNext) {
             
-            //get file name        
-            var file = schema.toString();
-            file     = eden('string').substring(file, 0, eden('string').size(file)-3),
-            content  = require('./schema/' + schema);
+            subSequence.then(function(subNext) {
+                //get file name        
+                var file = schema.toString();
+                file     = eden('string').substring(file, 0, eden('string').size(file)-3),
+                content  = require('./schema/' + schema);
 
-            //reset template
-            template = '<form method="post" class="form-horizontal">\n';
-            subNext(file, content);
+                //reset template
+                template = '<form method="post" class="form-horizontal">\n';
+                subNext(file, content);
             })
 
             //create control folder
@@ -553,26 +554,29 @@ eden('sequence')
             //read properties of schema and create a control template
             .then(function(file, content, subNext) {
                 _readKeys(content, file);
-                createTemplate(file, template);
-                createIndexTemplate(file);
+                createFormTemplate(file, template);
+                
+                console.log('Creating Index Template for', file);
+                createTemplate(file, '/control/template/', 'index.html');
+                
                 subNext(file);
 
             //create server template
             }).then(function(file, subNext) {
                 console.log('Creating Server Event for', file);
-                createServerTemplate(file, '/server/event/', serverEvent);
+                createTemplate(file, '/server/event/', serverEvent);
                 
                 console.log('Creating Server Action for', file);
-                createServerTemplate(file, '/server/action/', serverAction);
+                createTemplate(file, '/server/action/', serverAction);
                 
                 console.log('Creating Server Index for', file);
-                createServerTemplate(file, '/server/', 'index.js');
+                createTemplate(file, '/server/', 'index.js');
 
                 console.log('Creating Server store.js for', file);
-                createServerTemplate(file, '/server/', 'store.js', schema);
+                createTemplate(file, '/server/', 'store.js', schema);
 
                 console.log('Creating Server Factory for', file);
-                createServerTemplate(file, '/server/', 'factory.js');
+                createTemplate(file, '/server/', 'factory.js');
                 
                 subNext();
             });
