@@ -5,8 +5,8 @@ define(function() {
     
     /* Public Properties 
     -------------------------------*/
-    public.title        = 'Create temporary';
-    public.header       = 'Create temporary';
+    public.title        = 'Updating {temporary}';
+    public.header       = 'Updating {temporary}';
     public.subheader    = 'CRM';
 	
     public.crumbs = [{ 
@@ -40,7 +40,7 @@ define(function() {
     -------------------------------*/
     public.render = function() {
         $.sequence()
-			.setScope(this)
+			.setScope(this) 
         	.then(_setData)
         	.then(_output)
 			.then(_listen);
@@ -51,7 +51,7 @@ define(function() {
     /* Private Methods
     -------------------------------*/
     var _setData = function(next) {
-		this.data.mode 		= 'create';
+		this.data.mode 		= 'update';
 		this.data.url 		= window.location.pathname;
 		
 		var post = controller.getPost();
@@ -70,7 +70,38 @@ define(function() {
 			
 			//we are good to send this up
 			_process.call(this, next);
-			next();
+			
+			return;
+		}
+		
+		//if no data post set
+		if(!this.data.temporary) {
+			//get it from the server
+			//get temporary id
+			var id =  window.location.pathname.split('/')[3];
+			var url = controller.getServerUrl() + '/temporary/detail/'+id;
+			
+			$.getJSON(url, function(response) {
+				//format the birth to the HTML5 date format
+				if(response.results.published 
+				&& (new Date(response.results.published)).getTime() > 0) {
+					//convert date format
+					var published 	= new Date(response.results.published);
+					
+					var year 	= birth.getFullYear(),
+						month 	= birth.getMonth() < 9 ? '0'+(birth.getMonth() + 1) : (birth.getMonth() + 1),
+						day 	= birth.getDate() < 10 ? '0'+(birth.getDate()) : (birth.getDate());
+					
+					response.results.published = [year, month, day].join('-');
+				} else {
+					response.results.published = null;
+				}
+				
+				this.data.temporary = response.results;
+				
+				next();
+			}.bind(this));
+			
 			return;
 		}
 		
@@ -79,16 +110,17 @@ define(function() {
     
     var _output = function(next) {
 		//store form templates path to array
-        var forms = [];
+        var templates = [];
 
         //require form templates
         //assign it to main form
-        require(forms, function(form) {
+        require(templates, function(form) {
+   
 			var body = Handlebars.compile(form)(this.data);
 			
 			controller
-				.setTitle(this.title)
-				.setHeader(this.header)
+				.setTitle(this.title.replace('{temporary}', this.data.temporary.title))
+				.setHeader(this.header.replace('{temporary}', this.data.temporary.title)) 
 				.setSubheader(this.subheader)
 				.setCrumbs(this.crumbs)
 				.setBody(body);            
@@ -98,7 +130,7 @@ define(function() {
     };
 
     var _listen = function(next) {
-		$('form.package-temporary-form').on('keyup', 'input[name="title"]', function(e) {
+	   	$('form.package-temporary-form').on('keyup', 'input[name="title"]', function(e) {
 			var name = $(this);
 			//there's a delay in when the input value is updated
 			//we do this settime out to case for this
@@ -113,23 +145,28 @@ define(function() {
 			}, 1);
 		});
 	   
-	    next();
+	    next(); 
     };
 	
 	var _valid = function() {
 		//clear errors
 		this.data.errors = {};
 		
-        /*
+		/*
         validation here
         */
-
+		
 		//if we have no errors
 		return JSON.stringify(this.data.errors) == '{}';
 	};
 	
 	var _process = function(next) {
-		var url = controller.getServerUrl() + '/temporary/create';
+		var id 		=  window.location.pathname.split('/')[3],
+			url 	= controller.getServerUrl() + '/temporary/update/'+id;
+		
+		if(this.data.temporary.published) {
+			this.data.temporary.published += 'T00:00:00Z';
+		}
 		
 		//save data to database
 		$.post(url, this.data.temporary, function(response) {
