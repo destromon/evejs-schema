@@ -4,12 +4,13 @@ var eden      = require('./build/server/node_modules/edenjs/lib/index');
 //get schema if theres any
 var schemaFiles = eden('array').slice(process.argv, 2);
 
-var paths   = require('./config'),
-fs          = require('fs'),
-data        = {},
-serverEvent = {},
-serverAction= {},
-fileCount   = 0;
+var paths    = require('./config'),
+fs           = require('fs'),
+data         = {},
+serverEvent  = {},
+serverAction = {},
+controlAction= {},
+fileCount    = 0;
 
 eden('sequence')
 
@@ -68,6 +69,29 @@ eden('sequence')
             });        
         });    
     }
+})
+
+//get control action
+.then(function(next) {
+    console.log('getting server action...');
+    var dir = './template/control/action/';
+    fs.readdir(dir, function(err,files) {
+        if (err) throw err;
+        var c=0;
+        files.forEach(function(file){
+            c++;
+            fs.readFile(dir+file,'utf-8',function(err, schema) {
+                if (err) {
+                    console.log('invalid file');
+                    return;
+                }
+                controlAction[file]=schema;
+                if (0===--c) {
+                    next();
+                }            
+            });
+        });        
+    });
 })
 
 //get server event
@@ -374,30 +398,6 @@ eden('sequence')
         });
     }
 
-    // var createIndexTemplate = function(file) {
-    //     console.log('Creating Index page for', file);
-
-    //     //read template
-    //     subSequence.then(function(subNext) {
-    //         fs.readFile(paths.dev + '/template/control/template/index.html', 'utf-8', function(err, data){
-    //             var indexTemplate =  eden('string').replace(data, 'temp', file);
-    //             subNext(file, indexTemplate);
-    //         });
-    //     })
-
-    //     //create index template
-    //     .then(function(file, indexTemplate, subNext) {
-    //         fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + '/control/template/' + 'index.html', indexTemplate, function(err) {
-    //             if (err) {
-    //                 console.log('failed to create',file, 'template');
-    //             } else {
-    //                 console.log(file, 'Index template has been created.');
-    //                 subNext();
-    //             }          
-    //         });
-    //     });
-    // };
-
     //create template based on arguments
     var createTemplate = function(file, folder, source, schema) {
         //if its root
@@ -452,7 +452,7 @@ eden('sequence')
                     
                     //write file
                     .then(function(file, currentTemplate, subNext) {
-                        if (folder === '/server/action/') {
+                        if (folder === '/server/action/' || folder === '/control/action/') {
                             fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + folder + currentFile , currentTemplate, function(err) {
                                 if (err) {
                                     console.log('failed to create event template for', file);
@@ -558,6 +558,9 @@ eden('sequence')
                 
                 console.log('Creating Index Template for', file);
                 createTemplate(file, '/control/template/', 'index.html');
+
+                console.log('Creating Control Action for', file);
+                createTemplate(file, '/control/action/', controlAction);
                 
                 subNext(file);
 
