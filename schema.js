@@ -400,7 +400,6 @@ eden('sequence')
 
     //server events
     var createServerTemplate = function(file, folder, data) {
-        console.log('Creating Server Event for', file);
         for(var events in data){
             (function() {
                 var currentFile = events;
@@ -419,7 +418,7 @@ eden('sequence')
                             if (err) {
                                 console.log('failed to create event template for', file);
                             } else {
-                                console.log(file, currentFile, 'event has been created.');
+                                console.log(file, currentFile, 'action has been created.');
                                 subNext();
                             }        
                         });
@@ -464,16 +463,14 @@ eden('sequence')
 
             //create control action
             .then(function(file, content, subNext) {
-                console.log('Creating Control folder for', file, 'package');
                 eden('folder', paths.dev + '/' + paths.schema + '/' + file + '/control/action')
                 .mkdir(0777, function(err) {
                     subNext(file, content);
                 });
             })
 
-            //create control action
+            //create control template
             .then(function(file, content, subNext) {
-                console.log('Creating Control folder for', file, 'package');
                 eden('folder', paths.dev + '/' + paths.schema + '/' + file + '/control/template')
                 .mkdir(0777, function(err) {
                     subNext(file, content);
@@ -482,7 +479,6 @@ eden('sequence')
 
             //create control folder
             .then(function(file, content, subNext) {
-                console.log('Creating Control folder for', file, 'package');
                 eden('folder', paths.dev + '/' + paths.schema + '/' + file + '/control')
                 .mkdir(0777, function(err) {
                     subNext(file, content);
@@ -500,7 +496,6 @@ eden('sequence')
 
             //create server event
             .then(function(file, content, subNext) {
-                console.log('Creating Server folder for', file, 'package');
                 eden('folder', paths.dev + '/' + paths.schema + '/' + file + '/server/event')
                 .mkdir(0777, function(err) {
                     subNext(file, content);
@@ -509,14 +504,13 @@ eden('sequence')
 
             //create server action
             .then(function(file, content, subNext) {
-                console.log('Creating Server folder for', file, 'package');
                 eden('folder', paths.dev + '/' + paths.schema + '/' + file + '/server/action')
                 .mkdir(0777, function(err) {
                     subNext(file, content);
                 });
             })
 
-            //read properties and create template
+            //read properties and create control template
             .then(function(file, content, subNext) {
                 _readKeys(content, file);
                 createTemplate(file, template);
@@ -525,7 +519,9 @@ eden('sequence')
 
             //create server template
             }).then(function(file, subNext) {
+                console.log('Creating Server Event for', file);
                 createServerTemplate(file, 'event/', serverEvent);
+                 console.log('Creating Server Action for', file);
                 createServerTemplate(file, 'action/', serverAction);
                 subNext();
             });
