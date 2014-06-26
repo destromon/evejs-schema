@@ -4,14 +4,16 @@ var eden      = require('./build/server/node_modules/edenjs/lib/index');
 //get schema if theres any
 var schemaFiles = eden('array').slice(process.argv, 2);
 
+//require modules
 var paths    = require('./config'),
 fs           = require('fs'),
 data         = {},
 fileCount    = 0;
 
+//start sequence
 eden('sequence')
 
-//Create schema folder
+//Create schema folder inside build
 .then(function(next) {
     console.log('Creating Schema Folder..');
 
@@ -21,7 +23,7 @@ eden('sequence')
     });
 })
 
-//Loop through schema folder
+//Loop through schema folder in root directory
 .then(function(next) {
     console.log('Getting Schema...');
     var dir='./schema/';
@@ -45,7 +47,7 @@ eden('sequence')
             });
         });
     
-    //read all schema
+    //else, read all schema
     } else {
         fs.readdir(dir, function(err,files) {
             if (err) throw err;
@@ -69,11 +71,11 @@ eden('sequence')
     }
 })
 
-//loop through schema file and get properties
+//loop through each schema file and get its properties
 .then(function(next) {
     var subSequence = eden('sequence');
 
-    //create form template
+    //form handlebars template
     var template     = [],
     startBlock       = "{{#block 'form/fieldset' ",
     endStartBlock    = '}}',
@@ -99,8 +101,8 @@ eden('sequence')
                 +  'errors.' + value + '.message' 
                 +  endStartBlock;
 
+            //if data is set, it has multiple data, so loop through it
             if(data) {
-                //if data is set, loop through it
                 data = eden('string').split(data, '|');
                 for (var i = 0; i < eden('array').size(data); i++) {
                     template += newLine + tab + tab
@@ -112,6 +114,8 @@ eden('sequence')
                         +  eden('string').ucFirst(data[i])
                         +  closerBlock;
                 }
+
+            //otherwise, just set the template.
             } else {
                 template += newLine + tab + tab
                     +  innerStartBlock
@@ -135,6 +139,8 @@ eden('sequence')
             template += newLine + tab
                 +  closerBlock
                 +  newLine;
+
+        //template for select
         } else if(type === 'select') {
             //template for select
             template += newLine + tab
@@ -152,8 +158,9 @@ eden('sequence')
                 +  newLine + tab
                 +  closerBlock
                 +  newLine;
+
+        //default template
         } else {
-            //default template
             template += newLine + tab
                 +  startBlock 
                 +  '\'' + title + required + '\' '
@@ -168,8 +175,7 @@ eden('sequence')
                 +  newLine + tab
                 +  closerBlock
                 +  newLine;
-        }
-        
+        }    
     };
 
     var _readKeys = function(content, schema) {
@@ -201,7 +207,7 @@ eden('sequence')
                 type  = 'select';
                 
                 //otherwise, check if it has field property
-                //get its value
+                //and et its value
                 if(content[key].hasOwnProperty('field')) {
                     type = content[key].field.toString();
                 }
@@ -216,9 +222,11 @@ eden('sequence')
                 
                 //its a collection, recurse
                 _readKeys(content[key].data, schema);
+
+            //if no field property is set, get its type property
             } else {
-                
-                //get field according to 'type' property
+
+                //get field according to type property
                 if(content[key].hasOwnProperty('type')) {
                     field = content[key].type.toString();
                     field = eden('string').toLowerCase(field);
@@ -226,6 +234,9 @@ eden('sequence')
                     
                     //if its not a key
                     if(key != 0) {
+
+                        //we need to put a block
+                        //to group all collections
                         innerForm = true;
                         innerKey  = key;
                         template += newLine + '<hr />' 
@@ -255,7 +266,7 @@ eden('sequence')
                 } else if(eden('string').indexOf(field, 'boolean') !== -1) {
                     type = 'radio';
 
-                //if its date then its datetime
+                //if its date then its date
                 } else if(eden('string').indexOf(field, 'date') !== -1) {
                     type = 'date';
                 }
@@ -266,12 +277,12 @@ eden('sequence')
             title = eden('string').ucFirst(field);
             value = field;
 
-            //if its a collection, add collection name
+            //if its under the collection
+            //add the collection name
             if(innerForm) {
                 field = innerKey + '[' + field + ']';
             }
 
-            //now we got all the data, lets add it to template
             //ignore if field is created or updated
             if(key === 'created' || key === 'updated') {
                 continue;
@@ -286,6 +297,7 @@ eden('sequence')
                 }
             }
 
+            //now we got all the data, lets add it to template
             //check field type and assign it to template
             switch(type) {
                 //for radio
@@ -307,12 +319,14 @@ eden('sequence')
                     //check if it has type before assigning it to template
                     if(content[key].hasOwnProperty('type')) {
                         setTemplate(data, field, schema, value, title, required, type);
-                        break;
                     }
+
+                    break;
             }
         }
     };
 
+    //create form template
     var createFormTemplate = function(file, template) {
         fs.writeFile(paths.dev + '/' + paths.schema + '/' + file + '/control/template/' + 'form.html', template, function(err) {
             fileCount--;
@@ -325,11 +339,12 @@ eden('sequence')
                 }
             }            
         });
-    }
+    };
 
     var createTemplate = function(file, folder, destination, sourceFile, schema) {
+        //if its schema
+        //read and replace data base on schema
         if(sourceFile === 'store.js') {
-            //read and replace data base on schema
             subSequence.then(function(subNext) {
                 fs.readFile(paths.dev + folder +  sourceFile, 'utf-8', function(err, dataFile){
                     var currentSchema = eden('string').replace(data[schema], 'module.exports = ', ''),
@@ -337,8 +352,9 @@ eden('sequence')
                     subNext(file, currentTemplate);
                 });
             })
+
+        //else read and replace data base on file
         } else {
-            //read and replace data base on file
             subSequence.then(function(subNext) {
                 fs.readFile(paths.dev + folder +  sourceFile, 'utf-8', function(err, data){
                     var currentTemplate = eden('string').replace(data, 'temp', file);
@@ -360,7 +376,7 @@ eden('sequence')
                     }        
                 });
 
-            //filename is file
+            //else, filename is file
             } else {
                 fs.writeFile(paths.dev + paths.schema + '/' + file + destination + sourceFile , currentTemplate, function(err) {
                     if (err) {
@@ -379,8 +395,9 @@ eden('sequence')
         (function(){ 
             var schema = schemas;
             
+            //get schema data and file
             subSequence.then(function(subNext) {
-                //get file name        
+                //get file name of schema
                 var file = schema.toString();
                 file     = eden('string').substring(file, 0, eden('string').size(file)-3),
                 content  = require('./schema/' + schema);
@@ -390,6 +407,7 @@ eden('sequence')
                 subNext(file, content);
             })
 
+            //create folder per schema
             //create control folder
             .then(function(file, content, subNext) {
                 console.log('Creating Control folder for', file, 'package');
@@ -448,15 +466,18 @@ eden('sequence')
                 });
             })
 
-            //read properties of schema and create a control template
+            //now all folders has been created
+            //read properties of schema and create a form template
             .then(function(file, content, subNext) {
+                //read properties
                 _readKeys(content, file);
+                //create form
                 createFormTemplate(file, template);
 
                 subNext(file);
             })
 
-            //get file in control/template and create a template
+            //get files in control/template and create a control template
             .then(function(file, subNext) {
                 console.log('Creating Control Action for', file);
                 var dir = './template/control/template/';
@@ -475,7 +496,7 @@ eden('sequence')
                 });
             })
 
-            //get file in control/action and create a template
+            //get files in control/action and create a control action
             .then(function(file, subNext) {
                 console.log('Creating Control Action for', file);
                 var dir = './template/control/action/';
@@ -484,8 +505,8 @@ eden('sequence')
                     var action = files;
                     for (var page in action) {
                         var path = action[page].path;
-                        var thisFile = eden('string').substring(path, 
-                            eden('string').lastIndexOf(path, '/')+1, 
+                        var thisFile = eden('string')
+                            .substring(path, eden('string').lastIndexOf(path, '/') + 1,
                             eden('string').size(path));
                         
                         createTemplate(file, eden('string').substr(dir,1, eden('string').size(dir)) , '/control/action/', thisFile);
@@ -494,7 +515,7 @@ eden('sequence')
                 });
             })
 
-            //get file in server/event and create a template
+            //get files in server/event and create server event
             .then(function(file, subNext) {
                 console.log('Creating Server Event for', file);
 
@@ -504,8 +525,8 @@ eden('sequence')
                     events = files;
                     for (var page in events) {
                         var path = events[page].path;
-                        var thisFile = eden('string').substring(path, 
-                            eden('string').lastIndexOf(path, '/')+1, 
+                        var thisFile = eden('string')
+                            .substring(path, eden('string').lastIndexOf(path, '/') + 1,
                             eden('string').size(path));
                         
                         createTemplate(file, eden('string').substr(dir,1, eden('string').size(dir)) , '/server/event/', thisFile);
@@ -514,7 +535,7 @@ eden('sequence')
                 });
             })
 
-            //get file in server/action and create a template
+            //get files in server/action and create a server action
             .then(function(file, subNext) {
                 console.log('Creating Server Action for', file);
 
@@ -524,16 +545,18 @@ eden('sequence')
                     action = files;
                     for (var page in action) {
                         var path = action[page].path;
-                        var thisFile = eden('string').substring(path, 
-                            eden('string').lastIndexOf(path, '/')+1, 
+                        var thisFile = eden('string')
+                            .substring(path, eden('string').lastIndexOf(path, '/') + 1,
                             eden('string').size(path));
+
                         createTemplate(file, eden('string').substr(dir,1, eden('string').size(dir)) , '/server/action/', thisFile);
                     }
                 });
                 subNext(file);
             })
 
-            // for server/ index, store and factory;
+            // for server/, index, store and factory
+            // we need to pass the schema, as store will be using it
             .then(function(file, subNext) {
                 var dir = './template/server/';
                 var server = {};
@@ -541,9 +564,10 @@ eden('sequence')
                     server = files;
                     for (var page in server) {
                         var path = server[page].path;
-                        var thisFile = eden('string').substring(path, 
-                            eden('string').lastIndexOf(path, '/')+1, 
+                        var thisFile = eden('string')
+                            .substring(path, eden('string').lastIndexOf(path, '/') + 1,
                             eden('string').size(path));
+
                         createTemplate(file, eden('string').substr(dir,1, eden('string').size(dir)) , '/server/', thisFile, schema);
                     }
                 });
