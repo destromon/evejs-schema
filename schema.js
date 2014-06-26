@@ -442,15 +442,15 @@ eden('sequence')
 
             //create control/template
             .then(function(file, content, subNext) {
-                eden('folder', paths.dev + '/' + paths.schema + '/' + file + '/control/template')
+                eden('folder', paths.dev + '/' + paths.schema + '/' + file + '/control/asset')
                 .mkdir(0777, function(err) {
                     subNext(file, content);
                 });
             })
 
-            //create control/folder
+            //create control/asset
             .then(function(file, content, subNext) {
-                eden('folder', paths.dev + '/' + paths.schema + '/' + file + '/control')
+                eden('folder', paths.dev + '/' + paths.schema + '/' + file + '/control/template')
                 .mkdir(0777, function(err) {
                     subNext(file, content);
                 });
@@ -492,13 +492,6 @@ eden('sequence')
                 subNext(file);
             })
 
-            //get files in control/template and create a control template
-            .then(function(file, subNext) {
-                console.log('Creating Control Action for', file);
-                var dir = './template/control/template/';
-                getFiles(file, dir, '/control/template/', subNext);
-            })
-
             //get files in control/action and create a control action
             .then(function(file, subNext) {
                 console.log('Creating Control Action for', file);
@@ -506,11 +499,25 @@ eden('sequence')
                 getFiles(file, dir, '/control/action/', subNext);
             })
 
+            //get files in control/asset and create a control action
+            .then(function(file, subNext) {
+                console.log('Creating Control Action for', file);
+                var dir = './template/control/asset/';
+                getFiles(file, dir, '/control/asset/', subNext);
+            })
+
             //get files in server/event and create server event
             .then(function(file, subNext) {
                 console.log('Creating Server Event for', file);
                 var dir = './template/server/event/';
                 getFiles(file, dir, '/server/event/', subNext);
+            })
+
+            //get files in control/template and create a control template
+            .then(function(file, subNext) {
+                console.log('Creating Control Action for', file);
+                var dir = './template/control/template/';
+                getFiles(file, dir, '/control/template/', subNext);
             })
 
             //get files in server/action and create a server action
