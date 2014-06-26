@@ -348,7 +348,7 @@ eden('sequence')
             subSequence.then(function(subNext) {
                 fs.readFile(paths.dev + folder +  sourceFile, 'utf-8', function(err, dataFile){
                     var currentSchema = eden('string').replace(data[schema], 'module.exports = ', ''),
-                    currentTemplate   = eden('string').replace(dataFile, 'temp', currentSchema);
+                    currentTemplate   = eden('string').replace(dataFile, 'temporary', currentSchema);
                     subNext(file, currentTemplate);
                 });
             })
@@ -357,7 +357,7 @@ eden('sequence')
         } else {
             subSequence.then(function(subNext) {
                 fs.readFile(paths.dev + folder +  sourceFile, 'utf-8', function(err, data){
-                    var currentTemplate = eden('string').replace(data, 'temp', file);
+                    var currentTemplate = eden('string').replace(data, 'temporary', file);
                     subNext(file, currentTemplate);
                 });
             });

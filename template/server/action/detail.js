@@ -37,16 +37,16 @@ module.exports = (function() {
 				message: 'No ID set' });
 			
 			//trigger that a response has been made
-			this.controller.trigger('temp-action-response', this.request, this.response);
+			this.controller.trigger('temporary-action-response', this.request, this.response);
 			
 			return;
 		}
 		
 		var self = this;
 		
-		this.controller.temp().store()
+		this.controller.temporary().store()
 			.findOne({ _id: this.request.variables[0], active: true })
-			.lean().exec(function(error, temp) {
+			.lean().exec(function(error, temporary) {
 				//if there are errors
 				if(error) {
 					//setup an error response
@@ -55,17 +55,17 @@ module.exports = (function() {
 						message: error.message });
 					
 					//trigger that a response has been made
-					self.controller.trigger('temp-action-response', self.request, self.response);
+					self.controller.trigger('temporary-action-response', self.request, self.response);
 					return;
 				}
 				
 				//no error, then prepare the package
 				self.response.message = JSON.stringify({ 
 					error: false, 
-					results: temp });
+					results: temporary });
 				
 				//trigger that a response has been made
-				self.controller.trigger('temp-action-response', self.request, self.response);
+				self.controller.trigger('temporary-action-response', self.request, self.response);
 			});
 
 		return this;

@@ -37,7 +37,7 @@ module.exports = (function() {
 				message: 'No ID set' });
 			
 			//trigger that a response has been made
-			this.controller.trigger('temp-action-response', this.request, this.response);
+			this.controller.trigger('temporary-action-response', this.request, this.response);
 			
 			return;
 		}
@@ -49,7 +49,7 @@ module.exports = (function() {
 		//TRIGGER
 		this.controller
 			//when there is an error
-			.once('temp-update-error', function(error) {
+			.once('temporary-update-error', function(error) {
 				//setup an error response
 				self.response.message = JSON.stringify({ 
 					error: true, 
@@ -57,21 +57,21 @@ module.exports = (function() {
 					validation: error.errors || [] });
 				
 				//dont listen for success anymore
-				self.controller.unlisten('temp-update-success');
+				self.controller.unlisten('temporary-update-success');
 				//trigger that a response has been made
-				self.controller.trigger('temp-action-response', self.request, self.response);
+				self.controller.trigger('temporary-action-response', self.request, self.response);
 			})
 			//when it is successfull
-			.once('temp-update-success', function() {
+			.once('temporary-update-success', function() {
 				//set up a success response
 				self.response.message = JSON.stringify({ error: false });
 				//dont listen for error anymore
-				self.controller.unlisten('temp-update-error');
+				self.controller.unlisten('temporary-update-error');
 				//trigger that a response has been made
-				self.controller.trigger('temp-action-response', self.request, self.response);
+				self.controller.trigger('temporary-action-response', self.request, self.response);
 			})
-			//Now call to update the temp
-			.trigger('temp-update', this.controller, this.request.variables[0], query);
+			//Now call to update the temporary
+			.trigger('temporary-update', this.controller, this.request.variables[0], query);
 	};
 	
 	/* Private Methods

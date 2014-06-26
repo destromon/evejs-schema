@@ -37,7 +37,7 @@ module.exports = (function() {
 		//2. TRIGGER
 		this.controller
 			//when there is an error 
-			.once('temp-create-error', function(error) {
+			.once('temporary-create-error', function(error) {
 				//setup an error response
 				self.response.message = JSON.stringify({ 
 					error: true, 
@@ -45,21 +45,21 @@ module.exports = (function() {
 					validation: error.errors || [] });
 				
 				//dont listen for success anymore
-				self.controller.unlisten('temp-create-success');
+				self.controller.unlisten('temporary-create-success');
 				//trigger that a response has been made
-				self.controller.trigger('temp-action-response', self.request, self.response);
+				self.controller.trigger('temporary-action-response', self.request, self.response);
 			})
 			//when it is successfull
-			.once('temp-create-success', function() {
+			.once('temporary-create-success', function() {
 				//set up a success response
 				self.response.message = JSON.stringify({ error: false });
 				//dont listen for error anymore
-				self.controller.unlisten('temp-create-error');
+				self.controller.unlisten('temporary-create-error');
 				//trigger that a response has been made
-				self.controller.trigger('temp-action-response', self.request, self.response);
+				self.controller.trigger('temporary-action-response', self.request, self.response);
 			})
-			//Now call to remove the temp
-			.trigger('temp-create', this.controller, query);
+			//Now call to remove the temporary
+			.trigger('temporary-create', this.controller, query);
 	};
 	
 	/* Private Methods

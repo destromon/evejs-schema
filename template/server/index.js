@@ -1,22 +1,22 @@
 module.exports = function() {
 	//set a goto handler incase other packages
 	//want to access this
-	this.temp = function() {
+	this.temporary = function() {
 		return require('./factory').load(this);
 	};
 	
 	//on init set the paths
 	this.listen('init', function() {
-		this.path('temp', __dirname)
-			.path('temp/action', __dirname + '/action')
-			.path('temp/event', __dirname + '/event');
+		this.path('temporary', __dirname)
+			.path('temporary/action', __dirname + '/action')
+			.path('temporary/event', __dirname + '/event');
 	
 	}.bind(this))
 	 
 	//when the server starts listen to file events
 	.listen('start', function() {
 		//get event path
-		var self = this, events = this.temp().path('event');
+		var self = this, events = this.temporary().path('event');
 		
 		//get files in the event folder
 		this.eden.load('folder', events).getFiles(null, false, function(files) {
@@ -43,8 +43,8 @@ module.exports = function() {
 	
 	//when a server request has been made
 	.listen('server-request', function(control, request, response) {
-		//if path does not starts with /temp
-		if(request.path != '/temp' && request.path.indexOf('/temp/') !== 0) {
+		//if path does not starts with /temporary
+		if(request.path != '/temporary' && request.path.indexOf('/temporary/') !== 0) {
 			//do nothing
 			return;
 		}
@@ -52,8 +52,8 @@ module.exports = function() {
 		response.processing = true;
 		
 		//trim the prefix
-		var root 		= this.temp().path('action'),
-			path 		= request.path.replace('/temp', ''),
+		var root 		= this.temporary().path('action'),
+			path 		= request.path.replace('/temporary', ''),
 			buffer 		= path.split('/'),
 			action 		= root + '/index',
 			variables 	= [];
@@ -73,7 +73,7 @@ module.exports = function() {
 		//set the variables
 		request.variables = variables;
 		//listen for response
-		control.once('temp-action-response', function(request, response) {
+		control.once('temporary-action-response', function(request, response) {
 			//if it is a batch process
 			if(response.batch) {
 				//the batch will trigger the response

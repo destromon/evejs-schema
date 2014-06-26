@@ -9,7 +9,7 @@ module.exports = function() {
 	-------------------------------*/
 	var mongoose 	= require('mongoose');
 	
-	var _schema = temp
+	var _schema = temporary
 	
 	/* Loader
 	-------------------------------*/
