@@ -7,25 +7,67 @@ var schemaFolder = eden('array').slice(process.argv, 2);
 //require modules
 var paths = require('./config'),
 fs        = require('fs');
+
+//check if package already exist
+var packageExists = function(schema, folderCount, next) {
+    var message = false;
+    for(var folder in schema ){
+        (function() {
+            var path = paths.dev + paths.packages + '/' + folder;
+            fs.exists(path, function(exist) {
+                if(exist) {
+                    //display message once.
+                    if(message === false) {
+                        message = true;
+                        process.stdin.setEncoding('utf8');
+                        console.log('Package ' + folder + ' already exist. \nDo you want to overwrite it? [yes/no]');
+                        process.stdin.resume();
+                        process.stdin.on('data', function (text) {
+                            var lowerText = text.toString().toLowerCase().trim();
+                            switch(lowerText) {
+                                case 'yes':
+                                    console.log('Overwriting package...');
+                                    next(schema, folderCount);
+                                    break;
+                                case 'no':
+                                    process.exit();
+                                    break;
+                            }
+                        });
+                        return;
+                    }
+                }else{
+                    if(message === false){
+                        next(schema, folderCount);
+                    } 
+                }
+            });
+        })(folder);
+    }
+};
+
 //start sequence
 eden('sequence')
 
 //get folders in schema
 .then(function(next) {
+    var folderCount = 0;
     var schema = {};
-
+    //get schema base on inputted folder
     if(eden('string').size(schemaFolder.toString()) >= 1) {
         var c = 0;
         for(var i = 0; i < schemaFolder.length; i++) {
             (function() {   
                 c++;
+                folderCount++;
                 var folder = schemaFolder[i],
                 path       = paths.dev + paths.schema + '/' + folder;
                 fs.exists(path, function(exists) {
                     if(exists) {
                         schema[folder] = path;
                         if(0===--c){
-                            next(schema);
+                             //check if package already existing
+                            packageExists(schema, folderCount, next);
                         }
                     } else {
                         console.log('Package not found');
@@ -38,22 +80,25 @@ eden('sequence')
         eden('folder', paths.dev + paths.schema)
         .getFolders(null, false, function(folders) {
             for(var folder in folders) {
+                folderCount++;
                 (function() {
-                    var path = folders[folder].path;
-
-                    var thisFolder = eden('string')
+                    var path   = folders[folder].path,
+                    thisFolder = eden('string')
                         .substring(path, eden('string').lastIndexOf(path, '/') + 1,
                         eden('string').size(path));
                         schema[thisFolder] = path;
                 })();
             }
-            next(schema);
+
+            //check if package already existing
+            packageExists(schema, folderCount, next);
         });
     } 
 })
 
 //Loop through each folder in schema
-.then(function(schema, next) {
+.then(function(schema, folderCount, next) {
+
     //loop through each package and create a template
     var createPackage = function(schemaFolder, vendor) {
         var subSequence = eden('sequence');
@@ -353,13 +398,14 @@ eden('sequence')
                     //if its schema
                     //read and replace data base on schema
                     if(sourceFile === 'store.js') {
+                        --folderCount;
                         currentSchema = eden('string').replace(schemaFolder[schema], 'module.exports = ', ''),
                         currentTemplate   = eden('string').replace(data, /{TEMPORARY}/g, currentSchema);
-
                     //else read and replace data base on file
                     } else {
                         currentTemplate = eden('string').replace(data, /{TEMPORARY}/g, file);
                     }
+
                     subNext(file, currentTemplate);
                 });
             })
@@ -381,7 +427,14 @@ eden('sequence')
                         console.log('failed to create event template for', file);
                     } else {
                         console.log(vendor, file + destination + sourceFile, 'has been created');
-                        subNext();
+                        if(folderCount === 0) {
+                            //all has been created.
+                            //exit
+                            process.exit();
+                        } else {
+                            //loop again
+                            subNext();
+                        }   
                     }        
                 });
             });
@@ -403,7 +456,7 @@ eden('sequence')
         };
 
         //loop through schema folder
-        for(var schemas in schemaFolder)  {
+        for(var schemas in schemaFolder) {
             
             (function(){ 
                 var schema = schemas;
