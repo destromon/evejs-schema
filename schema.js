@@ -2,37 +2,50 @@
 var eden      = require('./build/server/node_modules/edenjs/lib/index');
 
 //get schema if theres any
-var schemaFiles = eden('array').slice(process.argv, 2);
+var schemaFolder = eden('array').slice(process.argv, 2);
 
 //require modules
-var paths    = require('./config'),
-fs           = require('fs');
-
+var paths = require('./config'),
+fs        = require('fs');
 //start sequence
 eden('sequence')
 
 //get folders in schema
 .then(function(next) {
-    console.log('Getting all folders...');
-    eden('folder', paths.dev + paths.schema)
-    .getFolders(null, false, function(folders) {
-        var schema = {};
-        for (var folder in folders) {
-            var path = folders[folder].path;
-            var thisFolder = eden('string')
-                .substring(path, eden('string').lastIndexOf(path, '/') + 1,
-                eden('string').size(path));
-                schema[thisFolder] = path;
+    var schema = {};
+
+    if(eden('string').size(schemaFolder.toString()) >= 1) {
+        for(var i = 0; i < schemaFolder.length; i++) {
+            (function() {
+                var folder = schemaFolder[i],
+                path        = paths.dev + paths.schema + '/' + folder;
+                schema[folder] = path;
+            })(schemaFolder[i]);
         }
         next(schema);
-    });
+    } else {
+        console.log('Getting All Folders...');
+        eden('folder', paths.dev + paths.schema)
+        .getFolders(null, false, function(folders) {
+            for(var folder in folders) {
+                (function() {
+                    var path = folders[folder].path;
+
+                    var thisFolder = eden('string')
+                        .substring(path, eden('string').lastIndexOf(path, '/') + 1,
+                        eden('string').size(path));
+                        schema[thisFolder] = path;
+                })();
+            }
+            next(schema);
+        });
+    } 
 })
 
 //Loop through each folder in schema
 .then(function(schema, next) {
-    
     //loop through each package and create a template
-    var createPackage = function(schemaFolder, fileCount, vendor) {
+    var createPackage = function(schemaFolder, vendor) {
         var subSequence = eden('sequence');
 
         //form handlebars template
@@ -499,12 +512,10 @@ eden('sequence')
 
     console.log('Getting All Schema in folder...');
     for (var folder in schema) {
-        var schemaFolder = {},
-        fileCount    = 0;
+        var schemaFolder = {};
         (function(){
             var dir      = schema[folder],
             schemaFolder = {},
-            fileCount    = 0,
             vendor = eden('string')
                 .substring(dir, eden('string').lastIndexOf(dir, '/') + 1,
                 eden('string').size(dir));
@@ -513,7 +524,6 @@ eden('sequence')
                 if (err) throw err;
                 var c=0;
                 files.forEach(function(file){
-                    fileCount++;
                     c++;
                     fs.readFile(dir + '/' + file,'utf-8',function(err, schema) {
                         if (err) {
@@ -525,11 +535,11 @@ eden('sequence')
                         if (0===--c) {
 
                             //call create package
-                            createPackage(schemaFolder, fileCount, vendor);
+                            createPackage(schemaFolder, vendor);
                         }
                     });
                 });
             });
-        })(schema[folder], schemaFolder, fileCount);
+        })(schema[folder], schemaFolder);
     }
 });
