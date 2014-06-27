@@ -71,8 +71,8 @@ eden('sequence')
         closerBlock      = '{{/block}}',
 
         innerForm        = false,
-        innerKey         = '';
-
+        innerKey         = '',
+        isArray          = false;
         var setTemplate = function(data, field, schema, value, title, required, type) {
             //set template accoding to type
             if(type === 'checkbox' || type === 'radio') {
@@ -202,9 +202,32 @@ eden('sequence')
                     
                     data = eden('string').substr(data, 0, eden('string').size(data)-1);
                 } else if(content[key].hasOwnProperty('data')) {
-                    
-                    //its a collection, recurse
+
+                    //its a data, recurse
                     _readKeys(content[key].data, schema);
+
+                //check if its an array
+                } else if(content[key] instanceof Array) {                    
+                    //we need to put a block
+                    //to group all collections
+                    innerForm = true;
+                    innerKey  = key;
+                    isArray   = true;
+                    template += newLine + '<hr />' 
+                             +  newLine + startBlock
+                             +  '\'' + 'Start: Template for ' 
+                             +  eden('string').ucFirst(key) + '\' '
+                             +  endBlock + closerBlock;
+
+                    _readKeys(content[key][0], schema);
+
+                    template += newLine + startBlock
+                             +  '\'' + 'End: Template for ' 
+                             +  eden('string').ucFirst(key) + '\' '
+                             +  endBlock + closerBlock 
+                             +  newLine + '<hr/ >' + newLine;
+                    innerForm = false;
+                    isArray   = false;
 
                 //if no field property is set, get its type property
                 } else {
@@ -263,14 +286,17 @@ eden('sequence')
                 //if its under the collection
                 //add the collection name
                 if(innerForm) {
-                    field = innerKey + '[' + field + ']';
+                    if(isArray) {
+                        field = innerKey + '[0][' +field + ']';
+                    } else {
+                        field = innerKey + '[' + field + ']';
+                    }
                 }
 
                 //ignore if field is created or updated
                 if(key === 'created' || key === 'updated') {
                     continue;
                 }
-
                 //check if it has required property!
                 if(content[key].hasOwnProperty('required')) {
                     required = ' <span>*</span>';

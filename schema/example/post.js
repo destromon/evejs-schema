@@ -1,17 +1,19 @@
 module.exports = {
-    slug    : { type: String, required: true, 
-        args: { class:'jay', id: 'yaj' }
-    },
+    slug    : { type: String, required: true, },
     title   : { type: String, required: true },
     detail  : { type: String, required: true, field: 'wysiwyg' },
 
     revision: [{
-        data: {
-            title   : { type: String },
-            detail  : { type: String, field: 'wysiwyg'},
-            created : { type: Date }
-        }
+        title   : { type: String },
+        detail  : { type: String, field: 'wysiwyg'},
+        created : { type: Date }
     }],
+
+    test     : {
+        title   : { type: String },
+        street  : { type: String },
+        city    : { type: String }
+    },
         
     status      : { type: String, enum: ['draft', 'review', 'published', 'other'] },
     visibility  : { type: String, enum: ['public', 'private'] },
