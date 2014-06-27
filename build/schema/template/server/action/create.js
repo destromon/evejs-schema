@@ -1,4 +1,4 @@
-module.exports = (function() {
+module.exports = (function() { 
 	var c = function(controller, request, response) {
         this.__construct.call(this, controller, request, response);
     }, public = c.prototype;
@@ -29,27 +29,15 @@ module.exports = (function() {
 	/* Public Methods
     -------------------------------*/
 	public.render = function() {
-		//if no ID
-		if(!this.request.variables[0]) {
-			//setup an error response
-			this.response.message = JSON.stringify({ 
-				error: true, 
-				message: 'No ID set' });
-			
-			//trigger that a response has been made
-			this.controller.trigger('temporary-action-response', this.request, this.response);
-			
-			return;
-		}
-		
+		//1. SETUP: change the string into a native object
 		var self = this, query = this
 			.controller.eden.load('string')
 			.queryToHash(this.request.message);
 		
-		//TRIGGER
+		//2. TRIGGER
 		this.controller
-			//when there is an error
-			.once('temporary-update-error', function(error) {
+			//when there is an error 
+			.once('{TEMPORARY}-create-error', function(error) {
 				//setup an error response
 				self.response.message = JSON.stringify({ 
 					error: true, 
@@ -57,21 +45,21 @@ module.exports = (function() {
 					validation: error.errors || [] });
 				
 				//dont listen for success anymore
-				self.controller.unlisten('temporary-update-success');
+				self.controller.unlisten('{TEMPORARY}-create-success');
 				//trigger that a response has been made
-				self.controller.trigger('temporary-action-response', self.request, self.response);
+				self.controller.trigger('{TEMPORARY}-action-response', self.request, self.response);
 			})
 			//when it is successfull
-			.once('temporary-update-success', function() {
+			.once('{TEMPORARY}-create-success', function() {
 				//set up a success response
 				self.response.message = JSON.stringify({ error: false });
 				//dont listen for error anymore
-				self.controller.unlisten('temporary-update-error');
+				self.controller.unlisten('{TEMPORARY}-create-error');
 				//trigger that a response has been made
-				self.controller.trigger('temporary-action-response', self.request, self.response);
+				self.controller.trigger('{TEMPORARY}-action-response', self.request, self.response);
 			})
-			//Now call to update the temporary
-			.trigger('temporary-update', this.controller, this.request.variables[0], query);
+			//Now call to remove the {TEMPORARY}
+			.trigger('{TEMPORARY}-create', this.controller, query);
 	};
 	
 	/* Private Methods

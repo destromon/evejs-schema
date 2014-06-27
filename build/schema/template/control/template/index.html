@@ -1,8 +1,8 @@
-<section class="temporary-list">
+<section class="{TEMPORARY}-list">
     <!-- START: SEARCH FORM -->
     <form class="pull-right search form-inline" method="get">
         <div class="form-group">
-            <input name="keyword" placeholder="Search temporarys" type="text"
+            <input name="keyword" placeholder="Search {TEMPORARY}s" type="text"
             value="{{#if keyword}}{{keyword}}{{/if}}" class="form-control" />
             {{#if mode}}
             <input type="hidden" name="mode" value="{{mode}}" /> 
@@ -13,7 +13,7 @@
     <!-- END: SEARCH FORM -->
     
     <!-- START: BULK FORM -->
-    <form action="/temporary/bulk" method="temporary" class="form-inline bulk-form">
+    <form action="/{TEMPORARY}/bulk" method="{TEMPORARY}" class="form-inline bulk-form">
         <!-- START: i18n HEADER TITLE -->
         <div class="table-header">
             Showing {{#if keyword}}Results for &quot;{{keyword}}&quot; in {{/if}}{{showing}}
@@ -23,10 +23,10 @@
             <div class="dataTables_wrapper table-filters" role="grid">
                 <div class="row">
                     <div class="col-sm-12">
-                        <!-- START: ADD NEW temporary -->
+                        <!-- START: ADD NEW {TEMPORARY} -->
                         <div class="pull-right create"><a class="btn btn-info btn-sm" 
-                        href="/temporary/create">Create New temporary</a></div>
-                        <!-- END: ADD NEW temporary -->
+                        href="/{TEMPORARY}/create">Create New {TEMPORARY}</a></div>
+                        <!-- END: ADD NEW {TEMPORARY} -->
                         {{#if rows}}
                         <!-- START: BULK ACTION -->
                         <select name="action" style="width:auto;" class="form-control">
@@ -41,23 +41,23 @@
                         <!-- START: FILTER BUTTONS -->
                         <span class="filter">
                             <a class="btn btn-sm{{#when mode '==' 'all'}} btn-light{{/when}}" 
-                            href="/temporary?mode=all{{#if keyword}}&keyword={{keyword}}{{/if}}">All &nbsp;
+                            href="/{TEMPORARY}?mode=all{{#if keyword}}&keyword={{keyword}}{{/if}}">All &nbsp;
                             <span class="badge badge-grey">{{all}}</span></a> 
                             
                             <a class="btn btn-sm{{#when mode '==' 'published'}} btn-light{{/when}}" 
-                            href="/temporary?mode=published{{#if keyword}}&keyword={{keyword}}{{/if}}">Published &nbsp;
+                            href="/{TEMPORARY}?mode=published{{#if keyword}}&keyword={{keyword}}{{/if}}">Published &nbsp;
                             <span class="badge badge-grey">{{published}}</span></a> 
                             
                             <a class="btn btn-sm{{#when mode '==' 'review'}} btn-light{{/when}}" 
-                            href="/temporary?mode=review{{#if keyword}}&keyword={{keyword}}{{/if}}">Review &nbsp;
+                            href="/{TEMPORARY}?mode=review{{#if keyword}}&keyword={{keyword}}{{/if}}">Review &nbsp;
                             <span class="badge badge-grey">{{review}}</span></a> 
                             
                             <a class="btn btn-sm{{#when mode '==' 'draft'}} btn-light{{/when}}" 
-                            href="/temporary?mode=draft{{#if keyword}}&keyword={{keyword}}{{/if}}">Draft &nbsp;
+                            href="/{TEMPORARY}?mode=draft{{#if keyword}}&keyword={{keyword}}{{/if}}">Draft &nbsp;
                             <span class="badge badge-grey">{{draft}}</span></a> 
                             
                             <a class="btn btn-sm{{#when mode '==' 'trash'}} btn-light{{/when}}" 
-                            href="/temporary?mode=trash{{#if keyword}}&keyword={{keyword}}{{/if}}">Trash &nbsp;
+                            href="/{TEMPORARY}?mode=trash{{#if keyword}}&keyword={{keyword}}{{/if}}">Trash &nbsp;
                             <span class="badge badge-grey">{{trash}}</span></a> 
                         </span>
                         <!-- END: FILTER BUTTONS -->
@@ -65,7 +65,7 @@
                 </div>
             </div> 
             {{#if rows}}
-            <!-- START: temporary TABLE -->
+            <!-- START: {TEMPORARY} TABLE -->
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -83,12 +83,12 @@
                         <td><input name="id[]" value="{{id}}" type="checkbox" class="form-control" /></td>
                         <td>
                             {{#if active}}
-                            <a title="Edit" href="/temporary/update/{{id}}">
+                            <a title="Edit" href="/{TEMPORARY}/update/{{id}}">
                             <i class="icon-edit"></i></a> &nbsp; 
-                            <a title="Remove" href="/temporary/remove/{{id}}"
+                            <a title="Remove" href="/{TEMPORARY}/remove/{{id}}"
                             class="text-danger remove"><i class="icon-remove" value="{{id}}"></i></a>
                             {{else}}
-                            <a title="Restore" href="/temporary/restore/{{id}}" class="text-success restore">
+                            <a title="Restore" href="/{TEMPORARY}/restore/{{id}}" class="text-success restore">
                             <i class="icon-external-link"></i></a>
                             {{/if}}
                         </td>
@@ -100,10 +100,10 @@
                     {{/each}}
                 </tbody>    
             </table>
-            <!-- END: temporary TABLE -->
+            <!-- END: {TEMPORARY} TABLE -->
             {{else}}
             <!-- START: NO RESULTS -->
-            <div class="well no-results">No temporarys Found</div>
+            <div class="well no-results">No {TEMPORARY}s Found</div>
             <!-- END: NO RESULTS -->
             {{/if}}
         </div>

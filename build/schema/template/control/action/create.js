@@ -5,19 +5,19 @@ define(function() {
     
     /* Public Properties 
     -------------------------------*/
-    public.title        = 'Create temporary';
-    public.header       = 'Create temporary';
+    public.title        = 'Create {TEMPORARY}';
+    public.header       = 'Create {TEMPORARY}';
     public.subheader    = 'CRM';
 	
     public.crumbs = [{ 
-        path: '/temporary',
-        icon: 'temporary', 
-        label: 'temporary' 
-    }, {  label: 'Create temporary' }];
+        path: '/{TEMPORARY}',
+        icon: '{TEMPORARY}', 
+        label: '{TEMPORARY}' 
+    }, {  label: 'Create {TEMPORARY}' }];
 	
     public.data     = {};
 	
-    public.template = controller.path('temporary/template') + '/form.html';
+    public.template = controller.path('{TEMPORARY}/template') + '/form.html';
     
     /* Private Properties
     -------------------------------*/
@@ -58,7 +58,7 @@ define(function() {
 		
 		if(post && post.length) {
 			//query to hash
-			this.data.temporary = $.queryToHash(post);
+			this.data.{TEMPORARY} = $.queryToHash(post);
 			
 			if(!_valid.call(this)) {			
 				//display message status
@@ -98,12 +98,12 @@ define(function() {
     };
 
     var _listen = function(next) {
-		$('form.package-temporary-form').on('keyup', 'input[name="title"]', function(e) {
+		$('form.package-{TEMPORARY}-form').on('keyup', 'input[name="title"]', function(e) {
 			var name = $(this);
 			//there's a delay in when the input value is updated
 			//we do this settime out to case for this
 			setTimeout(function() {
-				$('form.package-temporary-form input[name="slug"]').val($.trim(name.val()
+				$('form.package-{TEMPORARY}-form input[name="slug"]').val($.trim(name.val()
 				.toLowerCase()
 				.replace(/[^a-zA-Z0-9-_ ]/g, ''))
 				.replace(/\s/g, '-')
@@ -129,18 +129,18 @@ define(function() {
 	};
 	
 	var _process = function(next) {
-		var url = controller.getServerUrl() + '/temporary/create';
+		var url = controller.getServerUrl() + '/{TEMPORARY}/create';
 		
 		//save data to database
-		$.post(url, this.data.temporary, function(response) {
+		$.post(url, this.data.{TEMPORARY}, function(response) {
 			response = JSON.parse(response);
 			
 			if(!response.error) {		
 				controller				
 					//display message status
-					.notify('Success', 'temporary successfully created!', 'success')
+					.notify('Success', '{TEMPORARY} successfully created!', 'success')
 					//go to listing
-					.redirect('/temporary');
+					.redirect('/{TEMPORARY}');
 				
 				//no need to next since we are redirecting out
 				return;

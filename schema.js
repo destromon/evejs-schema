@@ -11,16 +11,6 @@ fs           = require('fs');
 //start sequence
 eden('sequence')
 
-//Create schema folder inside build
-.then(function(next) {
-    console.log('Creating Schema Folder..');
-
-    eden('folder', paths.dev + '/' + paths.schema)
-    .mkdir(0777, function() {
-        next();
-    });
-})
-
 //Loop through schema folder in root directory
 .then(function(next) {
     console.log('Getting Schema...');
@@ -342,51 +332,43 @@ eden('sequence')
     };
 
     var createTemplate = function(file, folder, destination, sourceFile, schema) {
-        //if its schema
-        //read and replace data base on schema
-        if(sourceFile === 'store.js') {
-            subSequence.then(function(subNext) {
-                fs.readFile(paths.dev + folder +  sourceFile, 'utf-8', function(err, dataFile){
-                    var currentSchema = eden('string').replace(schemaFolder[schema], 'module.exports = ', ''),
-                    currentTemplate   = eden('string').replace(dataFile, 'temporary', currentSchema);
-                    subNext(file, currentTemplate);
-                });
-            })
+        subSequence.then(function(subNext) {
+            fs.readFile(paths.dev + folder +  sourceFile, 'utf-8', function(err, data){
+                var currentSchema;
+                //if its schema
+                //read and replace data base on schema
+                if(sourceFile === 'store.js') {
+                    currentSchema = eden('string').replace(schemaFolder[schema], 'module.exports = ', ''),
+                    currentTemplate   = eden('string').replace(data, /{TEMPORARY}/g, currentSchema);
 
-        //else read and replace data base on file
-        } else {
-            subSequence.then(function(subNext) {
-                fs.readFile(paths.dev + folder +  sourceFile, 'utf-8', function(err, data){
-                    var currentTemplate = eden('string').replace(data, 'temporary', file);
-                    subNext(file, currentTemplate);
-                });
+                //else read and replace data base on file
+                } else {
+                    currentTemplate = eden('string').replace(data, /{TEMPORARY}/g, file);
+                }
+                subNext(file, currentTemplate);
             });
-        }
-           
+        })
+
         //write file
         subSequence.then(function(file, currentTemplate, subNext) {
+            var path;
             //if destination is event folder, filename is file-sourceFile
             if (destination === '/server/event/') {
-                fs.writeFile(paths.dev + paths.schema + '/' + file + destination + file +'-' + sourceFile , currentTemplate, function(err) {
-                    if (err) {
-                        console.log('failed to create event template for', file);
-                    } else {
-                        console.log(file + destination + sourceFile, 'has been created on');
-                        subNext();
-                    }        
-                });
+                path = paths.dev + paths.schema + '/' + file + destination + file +'-' + sourceFile;
 
             //else, filename is file
             } else {
-                fs.writeFile(paths.dev + paths.schema + '/' + file + destination + sourceFile , currentTemplate, function(err) {
-                    if (err) {
-                        console.log('failed to create event template for', file);
-                    } else {
-                        console.log(file + destination + sourceFile, 'has been created');
-                        subNext();
-                    }          
-                });
+                path = paths.dev + paths.schema + '/' + file + destination + sourceFile;
             }
+
+            fs.writeFile(path, currentTemplate, function(err) {
+                if (err) {
+                    console.log('failed to create event template for', file);
+                } else {
+                    console.log(file + destination + sourceFile, 'has been created');
+                    subNext();
+                }        
+            });
         });
     };
 
@@ -496,42 +478,42 @@ eden('sequence')
             //get files in control/action and create a control action
             .then(function(file, subNext) {
                 console.log('Creating Control Action for', file);
-                var dir = './template/control/action/';
+                var dir = './build/schema/template/control/action/';
                 getFiles(file, dir, '/control/action/', subNext);
             })
 
             //get files in control/asset and create a control action
             .then(function(file, subNext) {
                 console.log('Creating Control Action for', file);
-                var dir = './template/control/asset/';
+                var dir = './build/schema/template/control/asset/';
                 getFiles(file, dir, '/control/asset/', subNext);
             })
 
             //get files in server/event and create server event
             .then(function(file, subNext) {
                 console.log('Creating Server Event for', file);
-                var dir = './template/server/event/';
+                var dir = './build/schema/template/server/event/';
                 getFiles(file, dir, '/server/event/', subNext);
             })
 
             //get files in control/template and create a control template
             .then(function(file, subNext) {
                 console.log('Creating Control Action for', file);
-                var dir = './template/control/template/';
+                var dir = './build/schema/template/control/template/';
                 getFiles(file, dir, '/control/template/', subNext);
             })
 
             //get files in server/action and create a server action
             .then(function(file, subNext) {
                 console.log('Creating Server Action for', file);
-                var dir = './template/server/action/';
-                getFiles(file, dir, '/server/event/', subNext);
+                var dir = './build/schema/template/server/action/';
+                getFiles(file, dir, '/server/action/', subNext);
             })
 
             // for server/, index, store and factory
             // we need to pass the schema, as store will be using it
             .then(function(file, subNext) {
-                var dir = './template/server/';
+                var dir = './build/schema/template/server/';
                 var server = {};
                 eden('folder', dir).getFiles(null, false, function(files){
                     server = files;

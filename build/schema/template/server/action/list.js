@@ -87,7 +87,7 @@ module.exports = (function() {
 		}
 		
 		//remember the scope and load up the data store
-		var self = this, store = this.controller.temporary().store();
+		var self = this, store = this.controller.{TEMPORARY}().store();
 		
 		//if we just want the count based from the query
 		if(count) {
@@ -101,7 +101,7 @@ module.exports = (function() {
 						message: error.message });
 					
 					//trigger that a response has been made
-					self.controller.trigger('temporary-action-response', self.request, self.response);
+					self.controller.trigger('{TEMPORARY}-action-response', self.request, self.response);
 					return;
 				}
 				
@@ -111,7 +111,7 @@ module.exports = (function() {
 					results: data });
 				
 				//trigger that a response has been made
-				self.controller.trigger('temporary-action-response', self.request, self.response);
+				self.controller.trigger('{TEMPORARY}-action-response', self.request, self.response);
 			});
 			
 			return;
@@ -137,7 +137,7 @@ module.exports = (function() {
 					message: error.message });
 				
 				//trigger that a response has been made
-				self.controller.trigger('temporary-action-response', self.request, self.response);
+				self.controller.trigger('{TEMPORARY}-action-response', self.request, self.response);
 				return;
 			}
 			
@@ -147,7 +147,7 @@ module.exports = (function() {
 				results: data });
 			
 			//trigger that a response has been made
-			self.controller.trigger('temporary-action-response', self.request, self.response);
+			self.controller.trigger('{TEMPORARY}-action-response', self.request, self.response);
 		});
 	};
 	

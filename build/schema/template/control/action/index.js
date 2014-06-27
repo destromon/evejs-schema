@@ -5,17 +5,17 @@ define(function() {
 	
 	/* Public Properties
 	-------------------------------*/
-	public.title 		= 'temporary';
-	public.header 		= 'temporary';
+	public.title 		= '{TEMPORARY}';
+	public.header 		= '{TEMPORARY}';
 	public.subheader 	= 'CRM';
-	public.crumbs 		= [{ icon: 'temporary', label: 'temporary' }];
+	public.crumbs 		= [{ icon: '{TEMPORARY}', label: '{TEMPORARY}' }];
 	public.data 		= {};
 	
 	public.start		= 0;
 	public.page 		= 1;
 	public.range 		= 25;
 	
-	public.template 	= controller.path('temporary/template') + '/index.html';
+	public.template 	= controller.path('{TEMPORARY}/template') + '/index.html';
 	
 	/* Private Properties
 	-------------------------------*/
@@ -54,15 +54,18 @@ define(function() {
 		
 		//1. get the list
 		batch.push({ url: _getListRequest.call(this, query) });
+
+        //2. get the active count
+        batch.push({ url: _getActiveCountRequest.call(this, query) });
 		
-		//2. get the trash count
+		//3. get the trash count
 		batch.push({ url: _getTrashCountRequest.call(this, query) });
 		
-		//3. get all count
+		//4. get all count
 		batch.push({ url: _getAllCountRequest.call(this, query) });
 		
 		$.post(
-			controller.getServerUrl() + '/temporary/batch', 
+			controller.getServerUrl() + '/{TEMPORARY}/batch', 
 			JSON.stringify(batch), function(response) { 
 			response = JSON.parse(response);
 			
@@ -117,12 +120,12 @@ define(function() {
 	
 	var _listen = function(next) {
 		//listen to remove restore
-		$('section.temporary-list a.remove, section.temporary-list a.restore').click(function(e) {
+		$('section.{TEMPORARY}-list a.remove, section.{TEMPORARY}-list a.restore').click(function(e) {
 			e.preventDefault();
 			$(this).parent().parent().remove();
 		});
 		
-		$('section.temporary-list  tbody input[type="checkbox"]').click(function() {
+		$('section.{TEMPORARY}-list  tbody input[type="checkbox"]').click(function() {
 			setTimeout(function() {	
 				var allChecked = true;
 				jQuery('tbody input[type="checkbox"]').each(function() {
@@ -165,7 +168,7 @@ define(function() {
                 break;
 		}
 		
-		return '/temporary/list?' + $.hashToQuery(query);
+		return '/{TEMPORARY}/list?' + $.hashToQuery(query);
 	};
 	
 	var _getAllCountRequest = function(request) {
@@ -180,7 +183,7 @@ define(function() {
 		query.count = 1;
 		query.filter.active = 1;
 		
-		return '/temporary/list?' + $.hashToQuery(query);
+		return '/{TEMPORARY}/list?' + $.hashToQuery(query);
 	};
 	
 	var _getTrashCountRequest = function(request) {
@@ -195,7 +198,7 @@ define(function() {
 		query.count = 1;
 		query.filter.active = 0;
 		
-		return '/temporary/list?' + $.hashToQuery(query);
+		return '/{TEMPORARY}/list?' + $.hashToQuery(query);
 	};
 	
 	/* Adaptor

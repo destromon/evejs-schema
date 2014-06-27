@@ -30,7 +30,7 @@ module.exports = function() {
 	};
 	
 	public.path = function(key) {
-		return this.controller.path('temporary/' + key);
+		return this.controller.path('{TEMPORARY}/' + key);
 	};
 	
 	/* Private Methods

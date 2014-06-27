@@ -5,19 +5,19 @@ define(function() {
     
     /* Public Properties 
     -------------------------------*/
-    public.title        = 'Updating {temporary}';
-    public.header       = 'Updating {temporary}';
+    public.title        = 'Updating {{TEMPORARY}}';
+    public.header       = 'Updating {{TEMPORARY}}';
     public.subheader    = 'CRM';
 	
     public.crumbs = [{ 
-        path: '/temporary',
-        icon: 'temporary', 
-        label: 'temporary' 
-    }, {  label: 'Create temporary' }];
+        path: '/{TEMPORARY}',
+        icon: '{TEMPORARY}', 
+        label: '{TEMPORARY}' 
+    }, {  label: 'Create {TEMPORARY}' }];
 	
     public.data     = {};
 	
-    public.template = controller.path('temporary/template') + '/form.html';
+    public.template = controller.path('{TEMPORARY}/template') + '/form.html';
     
     /* Private Properties
     -------------------------------*/
@@ -58,7 +58,7 @@ define(function() {
 		
 		if(post && post.length) {
 			//query to hash
-			this.data.temporary = $.queryToHash(post);
+			this.data.{TEMPORARY} = $.queryToHash(post);
 			
 			if(!_valid.call(this)) {			
 				//display message status
@@ -75,11 +75,11 @@ define(function() {
 		}
 		
 		//if no data post set
-		if(!this.data.temporary) {
+		if(!this.data.{TEMPORARY}) {
 			//get it from the server
-			//get temporary id
+			//get {TEMPORARY} id
 			var id =  window.location.pathname.split('/')[3];
-			var url = controller.getServerUrl() + '/temporary/detail/'+id;
+			var url = controller.getServerUrl() + '/{TEMPORARY}/detail/'+id;
 			
 			$.getJSON(url, function(response) {
 				//format the birth to the HTML5 date format
@@ -97,7 +97,7 @@ define(function() {
 					response.results.published = null;
 				}
 				
-				this.data.temporary = response.results;
+				this.data.{TEMPORARY} = response.results;
 				
 				next();
 			}.bind(this));
@@ -119,8 +119,8 @@ define(function() {
 			var body = Handlebars.compile(form)(this.data);
 			
 			controller
-				.setTitle(this.title.replace('{temporary}', this.data.temporary.title))
-				.setHeader(this.header.replace('{temporary}', this.data.temporary.title)) 
+				.setTitle(this.title.replace('{{TEMPORARY}}', this.data.{TEMPORARY}.title))
+				.setHeader(this.header.replace('{{TEMPORARY}}', this.data.{TEMPORARY}.title)) 
 				.setSubheader(this.subheader)
 				.setCrumbs(this.crumbs)
 				.setBody(body);            
@@ -130,12 +130,12 @@ define(function() {
     };
 
     var _listen = function(next) {
-	   	$('form.package-temporary-form').on('keyup', 'input[name="title"]', function(e) {
+	   	$('form.package-{TEMPORARY}-form').on('keyup', 'input[name="title"]', function(e) {
 			var name = $(this);
 			//there's a delay in when the input value is updated
 			//we do this settime out to case for this
 			setTimeout(function() {
-				$('form.package-temporary-form input[name="slug"]').val($.trim(name.val()
+				$('form.package-{TEMPORARY}-form input[name="slug"]').val($.trim(name.val()
 				.toLowerCase()
 				.replace(/[^a-zA-Z0-9-_ ]/g, ''))
 				.replace(/\s/g, '-')
@@ -162,22 +162,22 @@ define(function() {
 	
 	var _process = function(next) {
 		var id 		=  window.location.pathname.split('/')[3],
-			url 	= controller.getServerUrl() + '/temporary/update/'+id;
+			url 	= controller.getServerUrl() + '/{TEMPORARY}/update/'+id;
 		
-		if(this.data.temporary.published) {
-			this.data.temporary.published += 'T00:00:00Z';
+		if(this.data.{TEMPORARY}.published) {
+			this.data.{TEMPORARY}.published += 'T00:00:00Z';
 		}
 		
 		//save data to database
-		$.post(url, this.data.temporary, function(response) {
+		$.post(url, this.data.{TEMPORARY}, function(response) {
 			response = JSON.parse(response);
 			
 			if(!response.error) {		
 				controller				
 					//display message status
-					.notify('Success', 'temporary successfully created!', 'success')
+					.notify('Success', '{TEMPORARY} successfully created!', 'success')
 					//go to listing
-					.redirect('/temporary');
+					.redirect('/{TEMPORARY}');
 				
 				//no need to next since we are redirecting out
 				return;

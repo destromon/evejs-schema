@@ -37,7 +37,7 @@ module.exports = (function() {
 				message: 'No ID set' });
 			
 			//trigger that a response has been made
-			this.controller.trigger('temporary-action-response', this.request, this.response);
+			this.controller.trigger('{TEMPORARY}-action-response', this.request, this.response);
 			
 			return;
 		}
@@ -46,28 +46,28 @@ module.exports = (function() {
 
 		this.controller
 			//when there is an error
-			.once('temporary-restore-error', function(error) {
+			.once('{TEMPORARY}-remove-error', function(error) {
 				//setup an error response
 				self.response.message = JSON.stringify({ 
 					error: true, 
 					message: error.message });
 				
 				//dont listen for success anymore
-				self.controller.unlisten('temporary-restore-success');
+				self.controller.unlisten('{TEMPORARY}-remove-success');
 				//trigger that a response has been made
-				self.controller.trigger('temporary-action-response', self.request, self.response);
+				self.controller.trigger('{TEMPORARY}-action-response', self.request, self.response);
 			})
 			//when it is successfull
-			.once('temporary-restore-success', function(row) {
+			.once('{TEMPORARY}-remove-success', function(row) {
 				//set up a success response
 				self.response.message = JSON.stringify({ error: false, results: row });
 				//dont listen for error anymore
-				self.controller.unlisten('temporary-restore-error');
+				self.controller.unlisten('{TEMPORARY}-remove-error');
 				//trigger that a response has been made
-				self.controller.trigger('temporary-action-response', self.request, self.response);
+				self.controller.trigger('{TEMPORARY}-action-response', self.request, self.response);
 			})
-			//Now call to remove the temporary
-			.trigger('temporary-restore', this.controller, this.request.variables[0]);
+			//Now call to remove the {TEMPORARY}
+			.trigger('{TEMPORARY}-remove', this.controller, this.request.variables[0]);
 	};
 	
 	/* Private Methods

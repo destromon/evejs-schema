@@ -39,10 +39,10 @@ define(function() {
 			return;
 		}
 		
-		temporary = $.queryToHash(temporary);
+		{TEMPORARY} = $.queryToHash({TEMPORARY});
 		
 		//if nothing was checked
-		if(!temporary.action) {
+		if(!{TEMPORARY}.action) {
 			controller.notify('Error', 'No bulk action chosen.', 'error');
 			window.history.back();
 			//do nothing
@@ -51,7 +51,7 @@ define(function() {
 		
 		
 		//if nothing was checked
-		if(!temporary.id || !temporary.id.length) {
+		if(!{TEMPORARY}.id || !{TEMPORARY}.id.length) {
 			controller.notify('Error', 'No items were chosen.', 'error');
 			window.history.back();
 			//do nothing
@@ -59,16 +59,16 @@ define(function() {
 		}
 		
 		//what is the url base
-		var url =  '/temporary/' + temporary.action + '/';
+		var url =  '/{TEMPORARY}/' + {TEMPORARY}.action + '/';
 		
 		//prepare the batch query
-		for(var batch = [], i = 0; i < temporary.id.length; i++) {
-			batch.push({ url: url + temporary.id[i] });
+		for(var batch = [], i = 0; i < {TEMPORARY}.id.length; i++) {
+			batch.push({ url: url + {TEMPORARY}.id[i] });
 		}
 		
 		//call the batch remove
 		$.post(
-		controller.getServerUrl() + '/temporary/batch', 
+		controller.getServerUrl() + '/{TEMPORARY}/batch', 
 		JSON.stringify(batch), function(response) { 
 			response = JSON.parse(response);
 			for(var errors = false, i = 0; i < response.length; i++) {
@@ -79,7 +79,7 @@ define(function() {
 			}
 			
 			if(!errors) {
-				controller.notify('Success', 'Bulk Action ' + temporary.action + ' successful!', 'success');
+				controller.notify('Success', 'Bulk Action ' + {TEMPORARY}.action + ' successful!', 'success');
 			}
 			
 			window.history.back();
