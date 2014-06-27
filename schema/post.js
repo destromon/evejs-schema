@@ -16,5 +16,12 @@ revision: [{
     active      : { type: Boolean, default: true },
     published   : { type: Date, default: Date.now },
     created     : { type: Date, default: Date.now },
-    updated     : { type: Date, default: Date.now }
+    updated     : { type: Date, default: Date.now },
+
+    color       : { type: String, field: 'color' },
+    datetime    : { type: String, field: 'datetime'  },
+    textarea    : { type: String, field: 'textarea' },
+    text        : { type: String, field: 'text'  },
+    autocomplete: { type: String, field: 'autocomplete'  },
+    checkbox    : { type: String, field: 'checkbox', enum:['food', 'drinks'] }
 };

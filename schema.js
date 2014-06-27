@@ -418,7 +418,7 @@ eden('sequence')
                 content  = require('./schema/' + schema);
 
                 //reset template
-                template = '<form method="post" class="form-horizontal">\n';
+                template = '<form method="post" class="' + file + '-form-horizontal">\n';
                 subNext(file, content);
             })
 
@@ -487,6 +487,7 @@ eden('sequence')
                 //read properties
                 _readKeys(content, file);
                 //create form
+                template += '</form>';
                 createFormTemplate(file, template);
 
                 subNext(file);
