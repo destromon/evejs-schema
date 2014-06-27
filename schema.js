@@ -529,7 +529,7 @@ var createPackage = function(schemaFolder, fileCount, vendor) {
                         }            
                     });
                 });
-            });   
+            });
         })(schema[folder], schemaFolder, fileCount);
     }
 });
