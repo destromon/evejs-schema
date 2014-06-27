@@ -305,7 +305,7 @@ eden('sequence')
                 if (err) {
                     console.log('failed to create',file, 'template');
                 } else {
-                    console.log(file, 'form.html template has been created.');
+                    console.log(vendor, file, 'form.html template has been created.');
                 }            
             });
         };
@@ -344,7 +344,7 @@ eden('sequence')
                     if (err) {
                         console.log('failed to create event template for', file);
                     } else {
-                        console.log(file + vendor + destination + sourceFile, 'has been created');
+                        console.log(vendor, file + destination + sourceFile, 'has been created');
                         subNext();
                     }        
                 });
