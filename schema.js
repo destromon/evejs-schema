@@ -526,7 +526,7 @@ eden('sequence')
 
                             //call create package
                             createPackage(schemaFolder, fileCount, vendor);
-                        }            
+                        }
                     });
                 });
             });
