@@ -30,96 +30,9 @@ eden('sequence')
 
 //Loop through each folder in schema
 .then(function(schema, next) {
-    console.log('Getting All Schema in folder...');
-    for (var folder in schema) {        
-        var schemaFolder = {},
-        fileCount    = 0;
-        (function(){
-            var dir      = schema[folder],
-            schemaFolder = {},
-            fileCount    = 0,
-            vendor = eden('string')
-                .substring(dir, eden('string').lastIndexOf(dir, '/') + 1,
-                eden('string').size(dir));
-
-            console.log('vendor', vendor);
-            fs.readdir(dir + '/', function(err,files) {
-                if (err) throw err;
-                var c=0;
-                files.forEach(function(file){
-                    fileCount++;
-                    c++;
-                    fs.readFile(dir + '/' + file,'utf-8',function(err, schema) {
-                        if (err) {
-                            console.log('invalid file', file);
-                            return;
-                        }
-
-                        schemaFolder[file]=schema;
-                        if (0===--c) {
-                            next(schemaFolder, fileCount, vendor);
-                        }            
-                    });
-                });
-            });   
-        })(schema[folder], schemaFolder, fileCount);
-    }
-})
-
-//Loop through schema folder in root directory
-// .then(function(currentFolder, next) {
-//     console.log('Getting Schema...', currentFolder);
-//     var dir      = './schema/';
-//     schemaFolder = {},
-//     fileCount    = 0;
-
-//     //if user specify a schema
-//     if(eden('string').size(schemaFiles.toString()) >= 1) {
-//         var c = 0;
-//         schemaFiles.forEach(function(file) {            
-//             c++;
-//             fs.readFile(dir+file,'utf-8',function(err, schema) {
-//                 fileCount++;
-//                 if (err) {
-//                     console.log('invalid file');
-//                     return;
-//                 }
-
-//                 schemaFolder[file]=schema;
-//                 if (0===--c) {
-//                     next(schemaFolder, fileCount);
-//                 }            
-//             });
-//         });
     
-//     //else, read all schema
-//     } else {
-//         fs.readdir(dir, function(err,files) {
-//             if (err) throw err;
-//             var c=0;
-//             files.forEach(function(file){
-//                 fileCount++;
-//                 c++;
-//                 fs.readFile(dir+file,'utf-8',function(err, schema) {
-//                     if (err) {
-//                         console.log('invalid file');
-//                         return;
-//                     }
-
-//                     schemaFolder[file]=schema;
-//                     if (0===--c) {
-//                         next(schemaFolder, fileCount);
-//                     }            
-//                 });
-//             });
-//         });    
-//     }
-// })
-
-//loop through each schema file and get its properties
-.then(function(schemaFolder, fileCount, vendor, next) {
-
-    console.log('preparing to loop', 'fileCount', fileCount);
+    //loop through each package and create a template
+var createPackage = function(schemaFolder, fileCount, vendor) {
     var subSequence = eden('sequence');
 
     //form handlebars template
@@ -375,8 +288,7 @@ eden('sequence')
 
     //create form template
     var createFormTemplate = function(file, template) {
-        fs.writeFile(paths.dev + '/' + paths.packages + '/' + file + '/control/template/' + 'form.html', template, function(err) {
-            fileCount--;
+        fs.writeFile(paths.dev + paths.packages + '/' + vendor + '/' + file + '/control/template/' + 'form.html', template, function(err) {
             if (err) {
                 console.log('failed to create',file, 'template');
             } else {
@@ -408,18 +320,18 @@ eden('sequence')
             var path;
             //if destination is event folder, filename is file-sourceFile
             if (destination === '/server/event/') {
-                path = paths.dev + paths.packages + '/' + file + destination + file +'-' + sourceFile;
+                path = paths.dev + paths.packages + '/' + vendor + '/' + file + destination + file +'-' + sourceFile;
 
             //else, filename is file
             } else {
-                path = paths.dev + paths.packages + '/' + file + destination + sourceFile;
+                path = paths.dev + paths.packages + '/' + vendor + '/' + file + destination + sourceFile;
             }
 
             fs.writeFile(path, currentTemplate, function(err) {
                 if (err) {
                     console.log('failed to create event template for', file);
                 } else {
-                    console.log(file + destination + sourceFile, 'has been created');
+                    console.log(file + vendor + destination + sourceFile, 'has been created');
                     subNext();
                 }        
             });
@@ -462,7 +374,7 @@ eden('sequence')
             //create control folder
             .then(function(file, content, subNext) {
                 console.log('Creating Control folder for', file, 'package');
-                eden('folder', paths.dev + '/' + paths.packages + '/' + file + '/control')
+                eden('folder', paths.dev + paths.packages + '/' + vendor + '/' + file + '/control')
                 .mkdir(0777, function(err) {
                     subNext(file, content);
                 });
@@ -470,7 +382,7 @@ eden('sequence')
 
             //create control/action
             .then(function(file, content, subNext) {
-                eden('folder', paths.dev + '/' + paths.packages + '/' + file + '/control/action')
+                eden('folder', paths.dev + paths.packages + '/' + vendor + '/' + file + '/control/action')
                 .mkdir(0777, function(err) {
                     subNext(file, content);
                 });
@@ -478,7 +390,7 @@ eden('sequence')
 
             //create control/template
             .then(function(file, content, subNext) {
-                eden('folder', paths.dev + '/' + paths.packages + '/' + file + '/control/asset')
+                eden('folder', paths.dev + paths.packages + '/' + vendor + '/' + file + '/control/asset')
                 .mkdir(0777, function(err) {
                     subNext(file, content);
                 });
@@ -486,7 +398,7 @@ eden('sequence')
 
             //create control/asset
             .then(function(file, content, subNext) {
-                eden('folder', paths.dev + '/' + paths.packages + '/' + file + '/control/template')
+                eden('folder',paths.dev + paths.packages + '/' + vendor + '/' + file + '/control/template')
                 .mkdir(0777, function(err) {
                     subNext(file, content);
                 });
@@ -495,7 +407,7 @@ eden('sequence')
             //create server/folder
             .then(function(file, content, subNext) {
                 console.log('Creating Server folder for', file, 'package');
-                eden('folder', paths.dev + '/' + paths.packages + '/' + file + '/server')
+                eden('folder', paths.dev + paths.packages + '/' + vendor + '/' + file + '/server')
                 .mkdir(0777, function(err) {
                     subNext(file, content);
                 });
@@ -503,7 +415,7 @@ eden('sequence')
 
             //create server/event
             .then(function(file, content, subNext) {
-                eden('folder', paths.dev + '/' + paths.packages + '/' + file + '/server/event')
+                eden('folder', paths.dev + paths.packages + '/' + vendor + '/' + file + '/server/event')
                 .mkdir(0777, function(err) {
                     subNext(file, content);
                 });
@@ -511,7 +423,7 @@ eden('sequence')
 
             //create server/action
             .then(function(file, content, subNext) {
-                eden('folder', paths.dev + '/' + paths.packages + '/' + file + '/server/action')
+                eden('folder', paths.dev + paths.packages + '/' + vendor + '/' + file + '/server/action')
                 .mkdir(0777, function(err) {
                     subNext(file, content);
                 });
@@ -582,5 +494,42 @@ eden('sequence')
                 subNext();
             });
         })(schemas);
+    }  
+};
+
+    console.log('Getting All Schema in folder...');
+    for (var folder in schema) {
+        var schemaFolder = {},
+        fileCount    = 0;
+        (function(){
+            var dir      = schema[folder],
+            schemaFolder = {},
+            fileCount    = 0,
+            vendor = eden('string')
+                .substring(dir, eden('string').lastIndexOf(dir, '/') + 1,
+                eden('string').size(dir));
+
+            fs.readdir(dir + '/', function(err,files) {
+                if (err) throw err;
+                var c=0;
+                files.forEach(function(file){
+                    fileCount++;
+                    c++;
+                    fs.readFile(dir + '/' + file,'utf-8',function(err, schema) {
+                        if (err) {
+                            console.log('invalid file', file);
+                            return;
+                        }
+
+                        schemaFolder[file]=schema;
+                        if (0===--c) {
+
+                            //call create package
+                            createPackage(schemaFolder, fileCount, vendor);
+                        }            
+                    });
+                });
+            });   
+        })(schema[folder], schemaFolder, fileCount);
     }
-}); 
+});
