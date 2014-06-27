@@ -15,14 +15,24 @@ eden('sequence')
     var schema = {};
 
     if(eden('string').size(schemaFolder.toString()) >= 1) {
+        var c = 0;
         for(var i = 0; i < schemaFolder.length; i++) {
-            (function() {
+            (function() {   
+                c++;
                 var folder = schemaFolder[i],
-                path        = paths.dev + paths.schema + '/' + folder;
-                schema[folder] = path;
+                path       = paths.dev + paths.schema + '/' + folder;
+                fs.exists(path, function(exists) {
+                    if(exists) {
+                        schema[folder] = path;
+                        if(0===--c){
+                            next(schema);
+                        }
+                    } else {
+                        console.log('Package not found');
+                    }
+                });
             })(schemaFolder[i]);
         }
-        next(schema);
     } else {
         console.log('Getting All Folders...');
         eden('folder', paths.dev + paths.schema)
